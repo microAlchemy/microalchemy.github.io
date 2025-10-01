@@ -1,18 +1,52 @@
-name: Deploy to GitHub Pageson:push:# Trigger the workflow whenever code is pushed to the 'main' branchbranches:- mainAllow manual trigger via the Actions tabworkflow_dispatch:The 'contents: write' permission is required for the 'gh-pages' packageto push the built files to the 'gh-pages' branch of your repository.permissions:contents: writejobs:deploy:runs-on: ubuntu-lateststeps:- name: Checkout repositoryuses: actions/checkout@v4  - name: Set up Node.js
-    uses: actions/setup-node@v4
-    with:
-      node-version: 20 # Using a current LTS version
-      cache: 'npm'
+name: Deploy to GitHub Pages 🚀
 
-  - name: Install dependencies
-    # This installs all your dependencies, including gh-pages
-    run: npm install
+on:
+  # Triggers the workflow on pushes to the main branch
+  push:
+    branches:
+      - main 
 
-  - name: Run Deploy Script
-    # This step executes "npm run predeploy" (which is "npm run build") 
-    # followed by "npm run deploy" (which runs "gh-pages -d dist").
-    run: npm run deploy
-    env:
-      # The GITHUB_TOKEN is automatically provided by GitHub and grants
-      # permissions to push the gh-pages branch.
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions to allow the GITHUB_TOKEN to create a deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Recommended latest LTS version
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+        
+      # 4. Run the build command
+      # This executes "tsc && vite build" which creates the production assets in the 'dist' directory.
+      - name: Build project
+        run: npm run build
+
+      # 5. Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' }} # Only deploy if pushing to the main branch
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          # The 'publish_branch' is the branch the assets will be pushed to (gh-pages is the common choice)
+          publish_branch: gh-pages
+          # The 'cname' is optional, but often useful if you are using a custom domain
+          # cname: example.com 
