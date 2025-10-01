@@ -1,0 +1,18 @@
+name: Deploy to GitHub Pageson:push:# Trigger the workflow whenever code is pushed to the 'main' branchbranches:- mainAllow manual trigger via the Actions tabworkflow_dispatch:The 'contents: write' permission is required for the 'gh-pages' packageto push the built files to the 'gh-pages' branch of your repository.permissions:contents: writejobs:deploy:runs-on: ubuntu-lateststeps:- name: Checkout repositoryuses: actions/checkout@v4  - name: Set up Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20 # Using a current LTS version
+      cache: 'npm'
+
+  - name: Install dependencies
+    # This installs all your dependencies, including gh-pages
+    run: npm install
+
+  - name: Run Deploy Script
+    # This step executes "npm run predeploy" (which is "npm run build") 
+    # followed by "npm run deploy" (which runs "gh-pages -d dist").
+    run: npm run deploy
+    env:
+      # The GITHUB_TOKEN is automatically provided by GitHub and grants
+      # permissions to push the gh-pages branch.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
