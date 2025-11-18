@@ -212,8 +212,6 @@
   background: rgb(var(--color-gold) / 0.1);
   border: 1px solid var(--color-gold-solid);
   border-radius: 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,12 +219,6 @@
   flex: 1;
   min-width: 200px;
   max-width: 280px;
-}
-
-.expertise-list li:hover {
-  background: rgb(var(--color-gold) / 0.2);
-  border-color: var(--color-white);
-  color: var(--color-gold-solid);
 }
 
 .expertise-list li::before {
@@ -250,10 +242,9 @@
 }
 
 .team-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
-  justify-content: center;
 }
 
 .team-card {
@@ -261,14 +252,12 @@
   border: 1px solid var(--color-gold-solid);
   border-radius: 0;
   padding: 1.5rem;
-  width: 200px;
-  flex: 1 1 200px;
-  max-width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 0.9rem;
+  width: 100%;
 }
 
 .team-card .team-name,
@@ -518,15 +507,6 @@
     flex: none;
   }
 
-  .team-grid {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .team-card {
-    width: 100%;
-  }
-
   .partners-grid {
     flex-direction: column;
   }
@@ -624,7 +604,7 @@
 /* Ensure proper touch handling on mobile */
 @media (hover: none) and (pointer: coarse) {
   .circuit-container {
-    touch-action: none;
+    touch-action: pan-y;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

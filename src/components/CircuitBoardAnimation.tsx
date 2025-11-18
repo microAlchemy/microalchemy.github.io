@@ -351,27 +351,15 @@ const CircuitBoardAnimation: React.FC = () => {
             >
             <h2 className="subtitle">Our expertise includes:</h2>
             <ul className="expertise-list">
-              <motion.li
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 3.6 }}
-              >
+              <li>
                 Compilers and analog design synthesis <br/> ✳ ✳ ✳
-              </motion.li>
-              <motion.li
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 3.7 }}
-              >
+              </li>
+              <li>
                 Semiconductor device fabrication and design <br/> ❇ ❇ ❇
-              </motion.li>
-              <motion.li
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 3.8 }}
-              >
+              </li>
+              <li>
                 Robotics and automation design for low volume manufacturing <br/> ✳ ✳ ✳
-              </motion.li>
+              </li>
             </ul>
           </motion.div>
                       <motion.div
