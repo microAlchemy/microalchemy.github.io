@@ -50,4 +50,4 @@ jobs:
           # The 'publish_branch' is the branch the assets will be pushed to (gh-pages is the common choice)
           publish_branch: gh-pages
           # The 'cname' is optional, but often useful if you are using a custom domain
-          # cname: microalchemy.xyz
+          cname: microalchemy.xyz
