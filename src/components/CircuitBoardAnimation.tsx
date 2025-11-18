@@ -17,7 +17,7 @@ type PartnerCard = {
 }
 
 const investorCards: PartnerCard[] = [
-  { name: 'Caffenated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
+  { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
   { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
 ]
 
