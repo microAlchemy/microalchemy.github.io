@@ -9,6 +9,24 @@ import adityaPhoto from '../img/team/aditya.jpeg'
 import kunalPhoto from '../img/team/kunal.jpeg'
 import saifPhoto from '../img/team/saif.jpeg'
 
+type PartnerCard = {
+  name: string
+  url: string
+  logo?: string
+  cta?: boolean
+}
+
+const investorCards: PartnerCard[] = [
+  { name: 'Caffenated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
+  { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
+]
+
+const partnerCards: PartnerCard[] = [
+  { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
+  { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
+  { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true },
+]
+
 const { floor, random } = Math
 
 const settings = {
@@ -391,10 +409,7 @@ const CircuitBoardAnimation: React.FC = () => {
             >
             <h2 className="subtitle">Investors</h2>
             <div className="partners-grid">
-              {[
-                { name: 'Caffenated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
-                { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
-              ].map(investor => (
+              {investorCards.map(investor => (
                 <a
                   className={`partner-card${investor.cta ? ' partner-card-cta' : ''}`}
                   href={investor.url}
@@ -423,11 +438,7 @@ const CircuitBoardAnimation: React.FC = () => {
             >
             <h2 className="subtitle">Technical Partners</h2>
             <div className="partners-grid">
-              {[
-                { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
-                { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
-                { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true },
-              ].map(partner => (
+              {partnerCards.map(partner => (
                 <a
                   className={`partner-card${partner.cta ? ' partner-card-cta' : ''}`}
                   href={partner.url}
