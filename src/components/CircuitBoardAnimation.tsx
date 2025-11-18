@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import uaLogo from '../img/ua-logo.svg'
+import caffeinatedLogo from '../img/investors/caffeinated.svg'
+import haystackLogo from '../img/investors/haystack.png'
+import gtechLogo from '../img/partners/gtech.png'
+import uwaterlooLogo from '../img/partners/uwaterloo.png'
+import adityaPhoto from '../img/team/aditya.jpeg'
+import kunalPhoto from '../img/team/kunal.jpeg'
+import saifPhoto from '../img/team/saif.jpeg'
 
 const { floor, random } = Math
 
@@ -7,8 +15,28 @@ const settings = {
   size: 10,
   leave: 10,
   wireMaxLen: 40,
-  stroke: '#d4af37',
-  fill: '#1a5d4a',
+}
+
+type Palette = {
+  wire: string
+  node: string
+  ring: string
+  white: string
+}
+
+const getColorPalette = (): Palette => {
+  if (typeof window === 'undefined')
+    return { wire: '#d4af37', node: '#f5f1e0', ring: '#ffffff', white: '#ffffff' }
+
+  const styles = getComputedStyle(document.documentElement)
+  const read = (prop: string, fallback: string) => styles.getPropertyValue(prop).trim() || fallback
+
+  return {
+    wire: read('--color-circuit-wire', '#d4af37'),
+    node: read('--color-circuit-node', '#f5f1e0'),
+    ring: read('--color-circuit-ring', '#ffffff'),
+    white: read('--color-white', '#ffffff'),
+  }
 }
 
 class Cell {
@@ -120,7 +148,7 @@ class Wire {
     }
   }
 
-  draw(svgElement: SVGSVGElement) {
+  draw(svgElement: SVGSVGElement, palette: Palette) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
@@ -131,11 +159,11 @@ class Wire {
 
     circle1.setAttribute('r', `${r}`)
     circle2.setAttribute('r', `${r}`)
-    circle1.setAttribute('stroke', `#fff`)
-    circle2.setAttribute('stroke', `#fff`)
-    circle1.setAttribute('fill', `#d4af37`)
-    circle2.setAttribute('fill', `#d4af37`)
-    
+    circle1.setAttribute('stroke', palette.ring)
+    circle2.setAttribute('stroke', palette.ring)
+    circle1.setAttribute('fill', palette.node)
+    circle2.setAttribute('fill', palette.node)
+
     // Add initial opacity and animation for dots
     circle1.setAttribute('opacity', '0')
     circle2.setAttribute('opacity', '0')
@@ -165,16 +193,16 @@ class Wire {
 
     path.setAttribute('d', d)
     path.setAttribute('fill', 'none')
-    path.setAttribute('stroke', settings.stroke)
+    path.setAttribute('stroke', palette.wire)
     path.setAttribute('stroke-width', `${settings.size / 4}`)
     const length = path.getTotalLength()
     path.setAttribute('stroke-dasharray', `${length}, ${length}`)
     path.setAttribute('stroke-dashoffset', `${length}`)
     path.classList.add('animated-path')
-    
+
     // Add delay to path drawing
     path.style.animationDelay = '1.0s'
-    
+
     svgElement.appendChild(path)
     svgElement.appendChild(circle1)
     svgElement.appendChild(circle2)
@@ -190,6 +218,7 @@ const CircuitBoardAnimation: React.FC = () => {
     const svg = svgRef.current
     if (!container || !svg) return
 
+    const palette = getColorPalette()
     // Clear existing animation
     svg.innerHTML = ''
 
@@ -221,7 +250,7 @@ const CircuitBoardAnimation: React.FC = () => {
       const wire = new Wire(cell)
       wires.push(wire)
       wire.generate(cells, cellsMap, rows, cols)
-      wire.draw(svg)
+      wire.draw(svg, palette)
     }
   }
 
@@ -235,7 +264,7 @@ const CircuitBoardAnimation: React.FC = () => {
 
     // Handle window resize
     window.addEventListener('resize', handleResize)
-    
+
     return () => {
       window.removeEventListener('resize', handleResize)
     }
@@ -250,43 +279,53 @@ const CircuitBoardAnimation: React.FC = () => {
         version="1.1"
       />
       <div className="text-overlay">
-        <motion.div 
+        <motion.div
           className="text-content"
-          initial={{ 
-            opacity: 0, 
+          initial={{
+            opacity: 0,
             scale: 0.95,
             y: 20
           }}
-          animate={{ 
-            opacity: 1, 
+          animate={{
+            opacity: 1,
             scale: 1,
             y: 0
           }}
-          transition={{ 
-            duration: 0.8, 
+          transition={{
+            duration: 0.8,
             delay: 2.5,
             ease: [0.25, 0.25, 0.25, 1]
           }}
         >
           <div className="text-content-inner">
-                      <motion.div 
+                      <motion.div
               className="title-row"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 3.0 }}
+              transition={{ duration: 0.6, delay: 2.0 }}
             >
             <h1 className="title">Welcome to MicroAlchemy</h1>
-            <h1 className="title">// MA</h1>
+            <div className="title-logo" aria-hidden="true">
+              <div
+                className="title-logo-mark"
+                style={{
+                  WebkitMask: `url(${uaLogo}) center / contain no-repeat`,
+                  mask: `url(${uaLogo}) center / contain no-repeat`,
+                }}
+              />
+            </div>
           </motion.div>
-                      <motion.p 
+                      <motion.p
               className="description"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.2 }}
             >
-            MicroAlchemy is a company dedicated to providing cutting-edge solutions in the realm of micro-technology and advanced material science. 
+            We're a startup revolutionizing silicon prototyping. We're cutting silicon fabrication lead times from 4 months to under 3 weeks targetting a 1μm process node.
+
+            We're breaking the silicon EDA duopoly with an open source toolchain coming soon!
           </motion.p>
-                      <motion.div 
+                      <motion.div
               className="expertise"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -317,7 +356,99 @@ const CircuitBoardAnimation: React.FC = () => {
               </motion.li>
             </ul>
           </motion.div>
-                      <motion.p 
+                      <motion.div
+              className="team-section"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 3.6 }}
+            >
+            <h2 className="subtitle">The Team</h2>
+            <div className="team-grid">
+              {[
+                { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto },
+                { name: 'Kunal Chandan', title: 'Chief Hardware Officer', photo: kunalPhoto },
+                { name: 'Saif Khattak', title: 'Chief Software Officer', photo: saifPhoto },
+              ].map(member => (
+                <div className="team-card" key={member.name}>
+                  <div className={`team-photo${member.photo ? ' has-image' : ''}`}>
+                    {member.photo ? (
+                      <img src={member.photo} alt={`${member.name} portrait`} />
+                    ) : (
+                      'Photo Placeholder'
+                    )}
+                  </div>
+                  <h3 className="team-name">{member.name}</h3>
+                  <p className="team-title">{member.title}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+                      <motion.div
+              className="partners-section investors-section"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 3.7 }}
+            >
+            <h2 className="subtitle">Investors</h2>
+            <div className="partners-grid">
+              {[
+                { name: 'Caffenated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
+                { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
+              ].map(investor => (
+                <a
+                  className={`partner-card${investor.cta ? ' partner-card-cta' : ''}`}
+                  href={investor.url}
+                  key={investor.name}
+                  target={investor.url.startsWith('http') ? '_blank' : undefined}
+                  rel={investor.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                >
+                  <div className={`partner-logo${investor.logo ? ' has-image' : ''}`}>
+                    {investor.logo
+                      ? <img src={investor.logo} alt={`${investor.name} logo`} />
+                      : investor.cta ? 'Invest with us' : 'Logo Placeholder'}
+                  </div>
+                  <span className="partner-name">{investor.name}</span>
+                  {investor.cta && (
+                    <span className="partner-cta-text">Contact us for details</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+                      <motion.div
+              className="partners-section"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 3.8 }}
+            >
+            <h2 className="subtitle">Technical Partners</h2>
+            <div className="partners-grid">
+              {[
+                { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
+                { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
+                { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true },
+              ].map(partner => (
+                <a
+                  className={`partner-card${partner.cta ? ' partner-card-cta' : ''}`}
+                  href={partner.url}
+                  key={partner.name}
+                  target={partner.url.startsWith('http') ? '_blank' : undefined}
+                  rel={partner.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                >
+                  <div className={`partner-logo${partner.logo ? ' has-image' : ''}`}>
+                    {partner.logo
+                      ? <img src={partner.logo} alt={`${partner.name} logo`} />
+                      : partner.cta ? 'Your Logo Here' : 'Logo Placeholder'}
+                  </div>
+                  <span className="partner-name">{partner.name}</span>
+                  {partner.cta && (
+                    <span className="partner-cta-text">Reach out to collaborate</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+                      <motion.p
               className="footer"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -325,13 +456,13 @@ const CircuitBoardAnimation: React.FC = () => {
             >
               Stay tuned for more updates and exciting developments!
             </motion.p>
-            <motion.p 
+            <motion.p
               className="contact"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 4.1 }}
             >
-            Email inquiries to <a href="mailto:info@microalchemy.xyz" className="email-link">info@microalchemy.xyz</a>
+            Email inquiries to <a href="mailto:aditya@microalchemy.xyz" className="email-link">aditya@microalchemy.xyz</a>
           </motion.p>
           </div>
         </motion.div>
@@ -340,4 +471,4 @@ const CircuitBoardAnimation: React.FC = () => {
   )
 }
 
-export default CircuitBoardAnimation 
+export default CircuitBoardAnimation
