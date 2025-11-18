@@ -4,7 +4,7 @@ on:
   # Triggers the workflow on pushes to the main branch
   push:
     branches:
-      - main 
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,7 +18,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       # 1. Checkout the repository code
       - name: Checkout repository
@@ -34,7 +34,7 @@ jobs:
       # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
-        
+
       # 4. Run the build command
       # This executes "tsc && vite build" which creates the production assets in the 'dist' directory.
       - name: Build project
@@ -50,5 +50,4 @@ jobs:
           # The 'publish_branch' is the branch the assets will be pushed to (gh-pages is the common choice)
           publish_branch: gh-pages
           # The 'cname' is optional, but often useful if you are using a custom domain
-          # cname: example.com 
-          cname: microalchemy.xyz
+          # cname: example.com
