@@ -6,8 +6,8 @@ import haystackLogo from '../img/investors/haystack.png'
 import gtechLogo from '../img/partners/gtech.png'
 import uwaterlooLogo from '../img/partners/uwaterloo.png'
 import adityaPhoto from '../img/team/aditya.jpeg'
-import kunalPhoto from '../img/team/kunal.jpeg'
-import saifPhoto from '../img/team/saif.jpeg'
+import kunalPhoto from '../img/team/kunal.jpg'
+import saifPhoto from '../img/team/saif.jpg'
 
 type PartnerCard = {
   name: string
