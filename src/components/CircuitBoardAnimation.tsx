@@ -333,16 +333,19 @@ const CircuitBoardAnimation: React.FC = () => {
               />
             </div>
           </motion.div>
-                      <motion.p
+                      <motion.div
               className="description"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.2 }}
             >
-            We're a startup revolutionizing silicon prototyping. We're cutting silicon fabrication lead times from 4 months to under 3 weeks targetting a 1μm process node.
-
-            We're breaking the silicon EDA duopoly with an open source toolchain coming soon!
-          </motion.p>
+            <p>We're a startup revolutionizing <i>silicon prototyping</i>.</p>
+            <p>We're cutting silicon fabrication lead times and breaking the silicon EDA duopoly.</p>
+            <ul className="description-list">
+              <li>Silicon wafers in under <strong>3 weeks</strong> on a <strong>1μm</strong> process.</li>
+              <li>An open source toolchain coming soon!</li>
+            </ul>
+          </motion.div>
                       <motion.div
               className="expertise"
               initial={{ opacity: 0, y: 10 }}
