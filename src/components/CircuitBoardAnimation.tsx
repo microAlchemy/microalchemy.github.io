@@ -6,7 +6,7 @@ import caffeinatedLogo from '../img/investors/caffeinated.svg'
 import haystackLogo from '../img/investors/haystack.png'
 import gtechLogo from '../img/partners/gtech.png'
 import uwaterlooLogo from '../img/partners/uwaterloo.png'
-import adityaPhoto from '../img/team/aditya.jpeg'
+import adityaPhoto from '../img/team/aditya.png'
 import kunalPhoto from '../img/team/kunal.jpg'
 import saifPhoto from '../img/team/saif.jpg'
 
@@ -380,12 +380,38 @@ const CircuitBoardAnimation: React.FC = () => {
             <h2 className="subtitle">The Team</h2>
             <div className="team-grid">
               {[
-                { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto },
-                { name: 'Kunal Chandan', title: 'Chief Hardware Officer', photo: kunalPhoto },
-                { name: 'Saif Khattak', title: 'Chief Software Officer', photo: saifPhoto },
+                {
+                  name: 'Aditya Srinivasan',
+                  title: 'Chief Executive Officer',
+                  photo: adityaPhoto,
+                  url: 'https://www.linkedin.com/in/srini-aditya/',
+                },
+                {
+                  name: 'Kunal Chandan',
+                  title: 'Chief Hardware Officer',
+                  photo: kunalPhoto,
+                  url: 'https://www.linkedin.com/in/kunal-chandan/',
+                },
+                {
+                  name: 'Saif Khattak',
+                  title: 'Chief Software Officer',
+                  photo: saifPhoto,
+                  url: 'https://www.linkedin.com/in/skhattak00/',
+                },
               ].map(member => (
-                <div className="team-card" key={member.name}>
-                  <div className={`team-photo${member.photo ? ' has-image' : ''}`}>
+                <motion.a
+                  className="team-card"
+                  key={member.name}
+                  href={member.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div
+                    className={`team-photo${member.photo ? ' has-image' : ''}`}
+                    aria-label={`${member.name} LinkedIn profile`}
+                  >
                     {member.photo ? (
                       <img src={member.photo} alt={`${member.name} portrait`} />
                     ) : (
@@ -394,7 +420,7 @@ const CircuitBoardAnimation: React.FC = () => {
                   </div>
                   <h3 className="team-name">{member.name}</h3>
                   <p className="team-title">{member.title}</p>
-                </div>
+                </motion.a>
               ))}
             </div>
           </motion.div>

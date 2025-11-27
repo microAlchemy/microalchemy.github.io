@@ -271,6 +271,13 @@
   text-align: center;
   gap: 0.9rem;
   width: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.team-card:hover {
+  border-color: var(--color-white);
 }
 
 .team-card .team-name,
