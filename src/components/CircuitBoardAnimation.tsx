@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import uaLogo from '../img/ua-logo.svg'
 import caffeinatedLogo from '../img/investors/caffeinated.svg'
@@ -345,6 +346,11 @@ const CircuitBoardAnimation: React.FC = () => {
               <li>Silicon wafers in under <strong>3 weeks</strong> on a <strong>1μm</strong> process.</li>
               <li>An open source toolchain coming soon!</li>
             </ul>
+            <div className="blog-cta">
+              <Link to="/blog" className="blog-cta-link">
+                Check out our blog →
+              </Link>
+            </div>
           </motion.div>
                       <motion.div
               className="expertise"
@@ -466,6 +472,16 @@ const CircuitBoardAnimation: React.FC = () => {
             >
             Email inquiries to <a href="mailto:aditya@microalchemy.xyz" className="email-link">aditya@microalchemy.xyz</a>
           </motion.p>
+                      <motion.div
+              className="blog-cta"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 4.2 }}
+            >
+              <Link to="/blog" className="blog-cta-link">
+                Visit the Microalchemy blog →
+              </Link>
+            </motion.div>
           </div>
         </motion.div>
       </div>

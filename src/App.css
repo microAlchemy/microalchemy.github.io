@@ -457,6 +457,27 @@
   color: var(--color-white);
 }
 
+.blog-cta {
+  margin-top: 1.25rem;
+}
+
+.blog-cta-link {
+  display: inline-block;
+  color: var(--color-white);
+  border: 1px solid var(--color-gold-solid);
+  padding: 0.6rem 1rem;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  background: rgb(var(--color-gold) / 0.1);
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.blog-cta-link:hover {
+  background: rgb(var(--color-gold) / 0.16);
+  border-color: var(--color-white);
+  transform: translateY(-1px);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .text-content {
