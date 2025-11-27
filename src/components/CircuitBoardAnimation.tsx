@@ -355,13 +355,13 @@ const CircuitBoardAnimation: React.FC = () => {
             <h2 className="subtitle">Our expertise includes:</h2>
             <ul className="expertise-list">
               <li>
-                Compilers and analog design synthesis <br/> ✳ ✳ ✳
+                Alembic a groundbreaking language for high level analog design <br/> ✳ ✳ ✳
               </li>
               <li>
-                Semiconductor device fabrication and design <br/> ❇ ❇ ❇
+                Chip manufacturing blazingly fast <br/> ❇ ❇ ❇
               </li>
               <li>
-                Robotics and automation design for low volume manufacturing <br/> ✳ ✳ ✳
+                Discover more on our web platform <br/> ✳ ✳ ✳
               </li>
             </ul>
           </motion.div>
