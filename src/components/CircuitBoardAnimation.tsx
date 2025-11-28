@@ -361,10 +361,10 @@ const CircuitBoardAnimation: React.FC = () => {
             <h2 className="subtitle">Our expertise includes:</h2>
             <ul className="expertise-list">
               <li>
-                Alembic a groundbreaking language for high level analog design <br/> ✳ ✳ ✳
+                Alembic: A groundbreaking language for high level analog design <br/> ✳ ✳ ✳
               </li>
               <li>
-                Chip manufacturing blazingly fast <br/> ❇ ❇ ❇
+                Chip manufacturing blazingly fast; turnaround in 3 weeks or less<br/> ❇ ❇ ❇
               </li>
               <li>
                 Discover more on our web platform <br/> ✳ ✳ ✳
@@ -498,16 +498,6 @@ const CircuitBoardAnimation: React.FC = () => {
             >
             Email inquiries to <a href="mailto:aditya@microalchemy.xyz" className="email-link">aditya@microalchemy.xyz</a>
           </motion.p>
-                      <motion.div
-              className="blog-cta"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 4.2 }}
-            >
-              <Link to="/blog" className="blog-cta-link">
-                Visit the Microalchemy blog →
-              </Link>
-            </motion.div>
           </div>
         </motion.div>
       </div>
