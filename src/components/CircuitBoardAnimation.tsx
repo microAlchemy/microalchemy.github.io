@@ -28,6 +28,27 @@ const partnerCards: PartnerCard[] = [
   { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true },
 ]
 
+const productCards = [
+  {
+    name: 'Alembic',
+    url: 'https://workshop.microalchemy.xyz/alembic',
+    description: 'High-level analog design language that brings software-speed iteration to silicon.',
+    cta: 'Discover Alembic →',
+  },
+  {
+    name: 'Workshop',
+    url: 'https://workshop.microalchemy.xyz',
+    description: 'Discover, remix, and share open source silicon designs in one place.',
+    cta: 'Explore Workshop →',
+  },
+  {
+    name: 'Foundry',
+    url: 'https://workshop.microalchemy.xyz/foundry',
+    description: 'Fast fabrication on a 1μm process with turnaround in under three weeks.',
+    cta: 'Build with Foundry →',
+  },
+]
+
 const { floor, random } = Math
 
 const settings = {
@@ -358,18 +379,24 @@ const CircuitBoardAnimation: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 3.4 }}
             >
-            <h2 className="subtitle">Our expertise includes:</h2>
-            <ul className="expertise-list">
-              <li>
-                Alembic: A groundbreaking language for high level analog design <br/> ✳ ✳ ✳
-              </li>
-              <li>
-                Chip manufacturing blazingly fast; turnaround in 3 weeks or less<br/> ❇ ❇ ❇
-              </li>
-              <li>
-                Discover more on our web platform <br/> ✳ ✳ ✳
-              </li>
-            </ul>
+            <h2 className="subtitle">Our Products:</h2>
+            <div className="partners-grid product-grid">
+              {productCards.map(product => (
+                <a
+                  key={product.name}
+                  className="partner-card product-card"
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="product-card-header">
+                    <span className="product-name">{product.name}</span>
+                  </div>
+                  <p className="product-desc">{product.description}</p>
+                  <span className="blog-cta-link product-cta">{product.cta}</span>
+                </a>
+              ))}
+            </div>
           </motion.div>
                       <motion.div
               className="team-section"

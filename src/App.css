@@ -238,6 +238,46 @@
   display: none;
 }
 
+.product-grid {
+  margin-top: 1rem;
+}
+
+.product-card {
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 360px;
+  min-height: 230px;
+  text-align: left;
+}
+
+.product-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.product-name {
+  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  color: var(--color-gold-solid);
+}
+
+.product-desc {
+  margin: 0;
+  color: var(--color-white);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.product-cta.blog-cta-link {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}
+
 .team-section {
   margin: 3rem 0;
   position: relative;
@@ -409,6 +449,17 @@
   max-height: 100%;
   object-fit: contain;
   filter: brightness(0) saturate(100%) invert(77%) sepia(46%) saturate(336%) hue-rotate(11deg) brightness(94%) contrast(95%);
+}
+
+.partner-card.product-card {
+  align-items: flex-start;
+  text-align: left;
+  width: 340px;
+  max-width: 380px;
+}
+
+.partner-card.product-card .product-desc {
+  text-align: left;
 }
 
 .partner-name {
