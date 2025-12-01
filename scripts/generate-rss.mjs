@@ -10,10 +10,7 @@ const BLOG_DIR = path.join(process.cwd(), 'src', 'blog')
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
 const OUTPUT_PATH = path.join(PUBLIC_DIR, 'rss.xml')
 
-const siteUrl = (pkg => {
-  if (pkg && pkg.homepage) return pkg.homepage.replace(/\/+$/, '')
-  return 'https://microalchemy.xyz'
-})(JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')))
+const siteUrl = 'https://microalchemy.xyz'
 
 if (!fs.existsSync(BLOG_DIR)) {
   console.warn('No blog directory found at src/blog; skipping RSS generation.')
@@ -22,11 +19,16 @@ if (!fs.existsSync(BLOG_DIR)) {
 
 const files = fs.readdirSync(BLOG_DIR).filter((file) => file.endsWith('.mdx'))
 
-const stripImports = (mdxSource) => mdxSource
-  .split('\n')
-  .filter((line) => !/^\s*import\s.+/.test(line))
-  .join('\n')
-  .trim()
+const stripImports = (mdxSource, filePath) => {
+  const lines = mdxSource.split('\n')
+  const imports = lines.filter((line) => /^\s*import\s.+/.test(line))
+  const unsupported = imports.filter((line) => !/\bCallout\b/.test(line))
+  if (unsupported.length) {
+    const list = unsupported.map((line) => line.trim()).join('; ')
+    throw new Error(`Unsupported MDX imports in ${filePath}: ${list}. Use absolute URLs or inline components instead.`)
+  }
+  return lines.filter((line) => !/^\s*import\s.+/.test(line)).join('\n').trim()
+}
 
 const calloutTitles = {
   info: 'Note',
@@ -45,8 +47,8 @@ const mdxComponents = {
   ),
 }
 
-const renderMdxToHtml = async (content) => {
-  const compiled = await compile(stripImports(content), {
+const renderMdxToHtml = async (content, filePath) => {
+  const compiled = await compile(stripImports(content, filePath), {
     development: false,
     outputFormat: 'function-body',
   })
@@ -75,7 +77,7 @@ async function buildRss() {
 
     if (!data.title || !data.summary) return null
 
-    const contentHtml = await renderMdxToHtml(content)
+    const contentHtml = await renderMdxToHtml(content, file)
 
     return {
       title: String(data.title),

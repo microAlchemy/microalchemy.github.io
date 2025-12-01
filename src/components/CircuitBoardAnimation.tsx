@@ -75,7 +75,7 @@ const team: TeamMember[] = [
 ]
 
 const { floor, random } = Math
-const settings = { size: 10, leave: 10, wireMaxLen: 40 }
+const settings = { size: 10, leave: 10, wireMaxLen: 40, maxWires: 600 }
 
 type Palette = { wire: string; node: string; ring: string; white: string }
 
@@ -224,7 +224,7 @@ const CircuitBoardAnimation: React.FC = () => {
 
     const rows = floor(height / settings.size)
     const cols = floor(width / settings.size)
-    const wireNum = floor(rows * cols / (settings.wireMaxLen + settings.leave))
+    const wireNum = Math.min(settings.maxWires, floor(rows * cols / (settings.wireMaxLen + settings.leave)))
     const cells: Cell[] = []
     const map: Record<string, Cell> = {}
     const wires: Wire[] = []
@@ -243,11 +243,19 @@ const CircuitBoardAnimation: React.FC = () => {
     }
   }
 
+  const resizeTimeoutRef = useRef<number | null>(null)
+
   useEffect(() => {
-    const handleResize = () => setTimeout(generate, 100)
+    const handleResize = () => {
+      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = window.setTimeout(generate, 120)
+    }
     generate()
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
   return (

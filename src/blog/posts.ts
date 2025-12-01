@@ -10,10 +10,9 @@ export type BlogFrontmatter = {
 
 type MdxModule = {
   default: ComponentType
-  frontmatter?: BlogFrontmatter
 }
 
-const eagerPosts = import.meta.glob('./*.mdx', { eager: true }) as Record<string, MdxModule>
+const eagerFrontmatter = import.meta.glob('./*.mdx', { eager: true, import: 'frontmatter' }) as Record<string, BlogFrontmatter | undefined>
 const lazyPosts = import.meta.glob('./*.mdx')
 
 export type BlogPostEntry = {
@@ -30,14 +29,12 @@ const normalizeFrontmatter = (slug: string, frontmatter?: BlogFrontmatter): Blog
   tags: Array.isArray(frontmatter?.tags) ? [...frontmatter.tags] : [],
 })
 
-export const posts: BlogPostEntry[] = Object.entries(eagerPosts)
+export const posts: BlogPostEntry[] = Object.entries(eagerFrontmatter)
   .map(([path]) => {
     const slug = path.replace('./', '').replace(/\.mdx$/, '')
     const importer = (lazyPosts[path] ?? lazyPosts[`./${slug}.mdx`]) as () => Promise<MdxModule>
-    const fm = eagerPosts[path]?.frontmatter as BlogFrontmatter | undefined
-    if (!fm) {
-      throw new Error(`Missing frontmatter export for blog post at ${path} (slug ${slug})`)
-    }
+    const fm = eagerFrontmatter[path]
+    if (!fm) throw new Error(`Missing frontmatter export for blog post at ${path} (slug ${slug})`)
     return {
       slug,
       import: importer,
