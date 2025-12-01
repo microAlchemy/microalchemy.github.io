@@ -38,11 +38,9 @@ const BlogIndex: React.FC = () => {
             <Link key={slug} to={`/blog/${slug}`} className="blog-card">
               <div className="blog-card-date">{formatDate(frontmatter.date) || frontmatter.date}</div>
               <h2 className="blog-card-title">{frontmatter.title}</h2>
-              {frontmatter.author && (
-                <div className="blog-card-author">By {frontmatter.author}</div>
-              )}
+              <div className="blog-card-author">By {frontmatter.author}</div>
               {frontmatter.summary && <p className="blog-card-summary">{frontmatter.summary}</p>}
-              {frontmatter.tags?.length ? (
+              {frontmatter.tags.length ? (
                 <div className="blog-tags">
                   {frontmatter.tags.map((tag) => (
                     <span key={tag} className="blog-tag">

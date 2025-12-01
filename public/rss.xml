@@ -5,12 +5,14 @@
     <link>https://microalchemy.xyz/blog</link>
     <description>Build logs, architecture notes, and experiments from the MicroAlchemy team.</description>
     <language>en</language>
-    <lastBuildDate>Mon, 01 Dec 2025 09:53:37 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 01 Dec 2025 22:55:00 GMT</lastBuildDate>
     
     <item>
       <title>Microalchemy Primer</title>
       <link>https://microalchemy.xyz/blog/primer</link>
-      <guid>https://microalchemy.xyz/blog/primer</guid>
+      <guid isPermaLink="true">https://microalchemy.xyz/blog/primer</guid>
+      <author>Microalchemy Team</author>
+      <category>fabrication</category><category>tooling</category><category>roadmap</category>
       <description>Why we are compressing silicon prototyping timelines and how we plan to ship it.</description>
       <content:encoded><![CDATA[<h1>MicroAlchemy Primer</h1>
 <p>We&#x27;re building tools and collapse the distance between an idea and working silicon. The goal is

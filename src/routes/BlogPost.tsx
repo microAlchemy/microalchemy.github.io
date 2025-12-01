@@ -5,12 +5,50 @@ import { findPost } from '../blog/posts'
 import './blog.css'
 
 type LazyModule = { default: React.ComponentType }
+type ErrorState = { hasError: boolean; message?: string }
 
 const formatDate = (value?: string) => {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+class PostErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorState> {
+  state: ErrorState = { hasError: false, message: undefined }
+
+  static getDerivedStateFromError(error: Error): ErrorState {
+    return { hasError: true, message: error?.message }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('Error rendering blog post', error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="blog-shell">
+          <div className="blog-container">
+            <div className="blog-error">
+              <h2>Unable to load post</h2>
+              <p>{this.state.message || 'Something went wrong while rendering this article.'}</p>
+              <div className="blog-nav" style={{ marginTop: '1rem' }}>
+                <Link to="/blog" className="ghost-link">
+                  Blog index
+                </Link>
+                <Link to="/" className="ghost-link">
+                  Home
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 }
 
 const mdxComponents = {
@@ -57,49 +95,51 @@ const BlogPost: React.FC = () => {
   )
 
   const formattedDate = formatDate(post.frontmatter.date) || post.frontmatter.date
-  const tags = post.frontmatter.tags ?? []
-  const author = post.frontmatter.author ?? 'Microalchemy Team'
+  const tags = post.frontmatter.tags
+  const author = post.frontmatter.author
 
   return (
-    <div className="blog-shell">
-      <div className="blog-container">
-        <div className="blog-header blog-post-header">
-          <div>
-            <div className="blog-eyebrow">Microalchemy blog</div>
-            <h1 className="blog-title">{post.frontmatter.title}</h1>
-            <div className="blog-meta">
-              <span>{author}</span>
-              {formattedDate && <span>{formattedDate}</span>}
-              {tags.map((tag) => (
-                <span key={tag} className="blog-tag">
-                  {tag}
-                </span>
-              ))}
+    <PostErrorBoundary>
+      <div className="blog-shell">
+        <div className="blog-container">
+          <div className="blog-header blog-post-header">
+            <div>
+              <div className="blog-eyebrow">Microalchemy blog</div>
+              <h1 className="blog-title">{post.frontmatter.title}</h1>
+              <div className="blog-meta">
+                <span>{author}</span>
+                {formattedDate && <span>{formattedDate}</span>}
+                {tags.map((tag) => (
+                  <span key={tag} className="blog-tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              {post.frontmatter.summary && <p className="blog-lede">{post.frontmatter.summary}</p>}
             </div>
-            {post.frontmatter.summary && <p className="blog-lede">{post.frontmatter.summary}</p>}
+            <div className="blog-nav">
+              <Link to="/blog" className="ghost-link">
+                All posts
+              </Link>
+              <Link to="/" className="ghost-link">
+                Home
+              </Link>
+              <a href="/rss.xml" className="ghost-link">
+                RSS
+              </a>
+            </div>
           </div>
-          <div className="blog-nav">
-            <Link to="/blog" className="ghost-link">
-              All posts
-            </Link>
-            <Link to="/" className="ghost-link">
-              Home
-            </Link>
-            <a href="/rss.xml" className="ghost-link">
-              RSS
-            </a>
-          </div>
-        </div>
 
-        <React.Suspense fallback={<div className="blog-loading">Loading post…</div>}>
-          <MDXProvider components={mdxComponents}>
-            <article className="blog-article">
-              <LazyPost />
-            </article>
-          </MDXProvider>
-        </React.Suspense>
+          <React.Suspense fallback={<div className="blog-loading">Loading post…</div>}>
+            <MDXProvider components={mdxComponents}>
+              <article className="blog-article">
+                <LazyPost />
+              </article>
+            </MDXProvider>
+          </React.Suspense>
+        </div>
       </div>
-    </div>
+    </PostErrorBoundary>
   )
 }
 
