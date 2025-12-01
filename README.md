@@ -37,3 +37,7 @@ npm run preview
 - `src/App.tsx` renders the hero experience.
 - `src/routes/BlogIndex.tsx` and `src/routes/BlogPost.tsx` handle the blog index/post views with shared styles in `src/routes/blog.css`.
 - `scripts/check-blog-frontmatter.mjs` validates MDX metadata; `scripts/generate-rss.mjs` emits `public/rss.xml`.
+
+## Reports and docs
+
+- Structural weaknesses audit: `docs/structural-report.md`
