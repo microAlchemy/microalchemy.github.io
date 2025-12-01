@@ -6,6 +6,7 @@
 .circuit-container {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-circuit-bg);
   position: relative;
   overflow: visible;
@@ -47,38 +48,12 @@
   animation-delay: 0.3s;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .circuit-container {
-    min-height: 100vh;
-    min-height: 100dvh; /* Use dynamic viewport height for better mobile support */
-  }
-
-  .text-overlay {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: 2rem 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .circuit-container {
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
-
-  .text-overlay {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: 1.5rem 0;
-  }
-}
-
 /* Text overlay styles */
 .text-overlay {
   position: relative;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 3rem 0;
   display: flex;
   align-items: center;
@@ -107,8 +82,14 @@
   text-align: left;
 }
 
-.title {
+.title,
+.subtitle,
+.card-name,
+.team-name {
   font-family: var(--font-mono);
+}
+
+.title {
   font-size: 1.75rem;
   font-weight: 400;
   color: var(--color-gold-solid);
@@ -125,16 +106,8 @@
   align-items: center;
   margin-bottom: 2rem;
   position: relative;
-}
-
-.title-row::after {
-  content: '';
-  position: absolute;
-  bottom: -1rem;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--color-gold-solid);
+  border-bottom: 1px solid var(--color-gold-solid);
+  padding-bottom: 1rem;
 }
 
 .title-row .title {
@@ -197,7 +170,6 @@
 }
 
 .subtitle {
-  font-family: var(--font-mono);
   font-size: 1rem;
   font-weight: 400;
   color: var(--color-gold-solid);
@@ -206,65 +178,9 @@
   text-transform: uppercase;
 }
 
-.expertise-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.expertise-list li {
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--color-white);
-  font-weight: 300;
-  padding: 1rem 1.5rem;
-  position: relative;
-  background: rgb(var(--color-gold) / 0.1);
-  border: 1px solid var(--color-gold-solid);
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  flex: 1;
-  min-width: 200px;
-  max-width: 280px;
-}
-
-.expertise-list li::before {
-  display: none;
-}
-
 .product-grid {
   margin-top: 1rem;
   width: 100%;
-}
-
-.product-card {
-  align-items: flex-start;
-  gap: 0.75rem;
-  width: 100%;
-  max-width: 360px;
-  min-height: 230px;
-  text-align: left;
-}
-
-.product-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.product-name {
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  color: var(--color-gold-solid);
 }
 
 .product-icon {
@@ -309,17 +225,6 @@
   position: relative;
 }
 
-.team-section::before {
-  content: '';
-  position: absolute;
-  top: -1.5rem;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--color-gold-solid);
-  opacity: 0.4;
-}
-
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -327,23 +232,8 @@
 }
 
 .team-card {
-  background: rgb(var(--color-gold) / 0.08);
-  border: 1px solid var(--color-gold-solid);
-  border-radius: 0;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.9rem;
   width: 100%;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.team-card:hover {
-  border-color: var(--color-white);
+  gap: 0.9rem;
 }
 
 .team-card .team-name,
@@ -364,13 +254,6 @@
 }
 
 .team-photo {
-  width: 120px;
-  height: 120px;
-  border: 2px dashed var(--color-gold-solid);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   background: rgb(var(--color-gold) / 0.12);
   font-size: 0.75rem;
@@ -387,12 +270,14 @@
 .team-photo img {
   width: 100%;
   height: 100%;
+  max-width: none;
+  max-height: none;
   object-fit: cover;
   display: block;
+  filter: none !important;
 }
 
 .team-name {
-  font-family: var(--font-mono);
   font-size: 1rem;
   margin: 0;
   color: var(--color-white);
@@ -411,6 +296,7 @@
   position: relative;
 }
 
+.team-section::before,
 .partners-section::before,
 .investors-section::before {
   content: '';
@@ -423,7 +309,7 @@
   opacity: 0.4;
 }
 
-.partners-grid {
+.cards-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
@@ -431,7 +317,7 @@
   width: 100%;
 }
 
-.partner-card {
+.card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -448,12 +334,12 @@
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.partner-card:hover {
+.card:hover {
   border-color: var(--color-white);
   transform: translateY(-4px);
 }
 
-.partner-logo {
+.card-logo {
   width: 120px;
   height: 120px;
   border: 2px dashed var(--color-gold-solid);
@@ -467,42 +353,50 @@
   color: var(--color-gold-solid);
 }
 
-.partner-logo.has-image {
+.card-logo.has-image {
   border: none;
   background: transparent;
 }
 
-.partner-logo img {
+.card-logo img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   filter: brightness(0) saturate(100%) invert(77%) sepia(46%) saturate(336%) hue-rotate(11deg) brightness(94%) contrast(95%);
 }
 
-.partner-card.product-card {
+.card-logo.team-photo img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  filter: none !important;
+}
+
+.card.product {
   align-items: flex-start;
   text-align: left;
   width: 340px;
   max-width: 380px;
 }
 
-.partner-card.product-card .product-desc {
+.card.product .product-desc {
   text-align: left;
 }
 
-.partner-name {
-  font-family: var(--font-mono);
+.card-name {
   font-size: 0.95rem;
   color: var(--color-white);
 }
 
-.partner-cta-text {
+.card-cta-text {
   font-size: 0.75rem;
   color: var(--color-gold-solid);
   letter-spacing: 0.5px;
 }
 
-.partner-card-cta {
+.card-cta {
   background: rgb(var(--color-gold) / 0.12);
 }
 
@@ -587,7 +481,6 @@
   }
 
   .title {
-    font-family: var(--font-mono);
     font-size: 1.4rem;
   }
 
@@ -597,7 +490,6 @@
   }
 
   .subtitle {
-    font-family: var(--font-mono);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
@@ -625,34 +517,17 @@
     margin: 2rem 0;
   }
 
-  .expertise-list {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .expertise-list li {
-    font-size: 0.75rem;
-    min-width: auto;
-    max-width: none;
-    flex: none;
-  }
-
-  .partners-grid {
+  .cards-grid {
     flex-direction: column;
     width: 100%;
   }
 
-  .partner-card {
+  .card {
     width: 100%;
     max-width: 100%;
   }
 
-  .product-grid {
-    width: 100%;
-  }
-
-  .partner-card.product-card,
-  .product-card {
+  .card.product {
     max-width: 100%;
   }
 }
@@ -676,7 +551,6 @@
   }
 
   .title {
-    font-family: var(--font-mono);
     font-size: 1.2rem;
     letter-spacing: 1px;
   }
@@ -687,7 +561,6 @@
   }
 
   .subtitle {
-    font-family: var(--font-mono);
     font-size: 0.8rem;
     margin-bottom: 1rem;
   }
@@ -712,34 +585,11 @@
     margin: 1.5rem 0;
   }
 
-  .expertise-list {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .expertise-list li {
-    font-size: 0.65rem;
-    padding: 0.8rem 1rem;
-    min-width: auto;
-    max-width: none;
-    flex: none;
-  }
-
-  .team-card {
+  .card {
     padding: 1rem;
   }
 
-  .team-photo {
-    width: 100px;
-    height: 100px;
-    font-size: 0.65rem;
-  }
-
-  .partner-card {
-    padding: 1rem;
-  }
-
-  .partner-logo {
+  .card-logo {
     width: 100px;
     height: 100px;
     font-size: 0.65rem;

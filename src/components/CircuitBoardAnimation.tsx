@@ -177,17 +177,17 @@ const Section: React.FC<{ title: string; delay: number; className?: string; chil
 )
 
 const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: string }> = ({ items, className = '', cardClassName = '' }) => (
-  <div className={`partners-grid ${className}`.trim()}>
+  <div className={`cards-grid ${className}`.trim()}>
     {items.map((item) => (
       <a
         key={item.name}
-        className={`partner-card${cardClassName ? ` ${cardClassName}` : ''}${item.cta ? ' partner-card-cta' : ''}`}
+        className={`card${cardClassName ? ` ${cardClassName}` : ''}${item.cta ? ' card-cta' : ''}${item.logoType === 'none' ? ' card-icon-only' : ''}`}
         href={item.url}
         target={item.url.startsWith('http') ? '_blank' : undefined}
         rel={item.url.startsWith('http') ? 'noopener noreferrer' : undefined}
       >
         {item.logoType !== 'none' && (
-          <div className={`partner-logo${item.logo ? ' has-image' : ''}`}>
+          <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
             {item.logoType === 'image' || (!item.logoType && item.logo) ? (
               item.logo
                 ? <img src={item.logo} alt={`${item.name} logo`} />
@@ -197,13 +197,13 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
             )}
           </div>
         )}
-        <span className="partner-name">
+        <span className="card-name">
           {item.icon && <span className="product-icon" aria-hidden>{item.icon}</span>}
           {item.name}
         </span>
         {item.description && <p className="product-desc">{item.description}</p>}
         {item.ctaText && <span className="blog-cta-link product-cta">{item.ctaText}</span>}
-        {item.cta && !item.ctaText && <span className="partner-cta-text">Reach out to collaborate</span>}
+        {item.cta && !item.ctaText && <span className="card-cta-text">Reach out to collaborate</span>}
       </a>
     ))}
   </div>
@@ -282,7 +282,7 @@ const CircuitBoardAnimation: React.FC = () => {
             </motion.div>
 
             <Section title="Our Products" delay={3.4} className="expertise">
-              <CardGrid className="product-grid" cardClassName="product-card" items={products} />
+              <CardGrid className="product-grid" cardClassName="product" items={products} />
             </Section>
 
             <Section title="The Team" delay={3.6} className="team-section">
@@ -290,14 +290,14 @@ const CircuitBoardAnimation: React.FC = () => {
                 {team.map((member) => (
                   <motion.a
                     key={member.name}
-                    className="team-card"
+                    className="card team-card"
                     href={member.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className={`team-photo${member.photo ? ' has-image' : ''}`} aria-label={`${member.name} LinkedIn profile`}>
+                    <div className={`card-logo team-photo${member.photo ? ' has-image' : ''}`} aria-label={`${member.name} LinkedIn profile`}>
                       {member.photo ? <img src={member.photo} alt={`${member.name} portrait`} /> : 'Photo Placeholder'}
                     </div>
                     <h3 className="team-name">{member.name}</h3>
