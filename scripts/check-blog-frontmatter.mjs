@@ -1,49 +1,31 @@
 import fs from 'fs'
-import path from 'path'
-import matter from 'gray-matter'
-
-const BLOG_DIR = path.join(process.cwd(), 'src', 'blog')
+import { BLOG_DIR, loadBlogPosts, listBlogFiles } from './blog-frontmatter.mjs'
 
 if (!fs.existsSync(BLOG_DIR)) {
   console.log('No blog directory found at src/blog; skipping blog lint.')
   process.exit(0)
 }
 
-const files = fs.readdirSync(BLOG_DIR).filter((file) => file.endsWith('.mdx'))
-const errors = []
-
-for (const file of files) {
-  const fullPath = path.join(BLOG_DIR, file)
-  const content = fs.readFileSync(fullPath, 'utf8')
-  const { data } = matter(content)
-  const slug = file.replace(/\.mdx$/, '')
-
-  if (!data.title) errors.push(`${file}: missing required frontmatter "title"`)
-  if (!data.author) errors.push(`${file}: missing required frontmatter "author"`)
-  if (!data.date) {
-    errors.push(`${file}: missing required frontmatter "date"`)
-  } else if (Number.isNaN(Date.parse(data.date))) {
-    errors.push(`${file}: "date" is not a valid date`)
-  }
-
-  if (data.slug && data.slug !== slug) {
-    errors.push(`${file}: frontmatter "slug" should match the filename (${slug})`)
-  }
-
-  if (data.tags && !Array.isArray(data.tags)) {
-    errors.push(`${file}: "tags" must be an array when provided`)
-  }
-
-  if (!data.summary) {
-    errors.push(`${file}: missing required frontmatter "summary"`)
-  } else if (typeof data.summary !== 'string') {
-    errors.push(`${file}: "summary" must be a string when provided`)
-  }
-}
-
+const files = listBlogFiles()
 if (!files.length) {
   console.log('No MDX posts found under src/blog (skipping).')
   process.exit(0)
+}
+
+const posts = loadBlogPosts()
+const errors = []
+const slugs = new Set()
+
+for (const post of posts) {
+  if (slugs.has(post.slug)) {
+    errors.push(`${post.file}: duplicate slug "${post.slug}"`)
+  } else {
+    slugs.add(post.slug)
+  }
+
+  for (const err of post.errors) {
+    errors.push(`${post.file}: ${err}`)
+  }
 }
 
 if (errors.length) {

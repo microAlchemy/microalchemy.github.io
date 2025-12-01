@@ -25,6 +25,12 @@ npm run build
 npm run preview
 ```
 
+## CI and testing
+
+- Requires Node 18+ (see `.nvmrc`).
+- `npm run check` mirrors CI by building (with frontmatter lint + RSS) and asserting tracked files stay clean.
+- Docker parity: `docker build -f docker/ci.Dockerfile .` runs lint + build in a Node 20 container.
+
 ## Content updates
 
 - Hero copy, product links, investors, partners, and team members live in `src/components/CircuitBoardAnimation.tsx`.
@@ -37,3 +43,7 @@ npm run preview
 - `src/App.tsx` renders the hero experience.
 - `src/routes/BlogIndex.tsx` and `src/routes/BlogPost.tsx` handle the blog index/post views with shared styles in `src/routes/blog.css`.
 - `scripts/check-blog-frontmatter.mjs` validates MDX metadata; `scripts/generate-rss.mjs` emits `public/rss.xml`.
+
+## Reports and docs
+
+- Structural weaknesses audit: `docs/structural-report.md`

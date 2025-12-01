@@ -4,6 +4,9 @@
   "description": "MicroAlchemy marketing site and MDX blog",
   "main": "index.js",
   "homepage": "https://microalchemy.github.io",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "prebuild": "npm run lint:blog && npm run rss",
@@ -11,6 +14,7 @@
     "preview": "vite preview",
     "lint:blog": "node scripts/check-blog-frontmatter.mjs",
     "rss": "node scripts/generate-rss.mjs",
+    "check": "npm run build && (git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git diff --exit-code --stat || echo \"Skipping git diff (repository not available)\")",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

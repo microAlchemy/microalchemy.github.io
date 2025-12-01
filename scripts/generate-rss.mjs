@@ -4,7 +4,7 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { compile, run } from '@mdx-js/mdx'
 import * as runtime from 'react/jsx-runtime'
-import matter from 'gray-matter'
+import { loadBlogPosts } from './blog-frontmatter.mjs'
 
 const BLOG_DIR = path.join(process.cwd(), 'src', 'blog')
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
@@ -16,8 +16,6 @@ if (!fs.existsSync(BLOG_DIR)) {
   console.warn('No blog directory found at src/blog; skipping RSS generation.')
   process.exit(0)
 }
-
-const files = fs.readdirSync(BLOG_DIR).filter((file) => file.endsWith('.mdx'))
 
 const stripImports = (mdxSource, filePath) => {
   const lines = mdxSource.split('\n')
@@ -69,25 +67,42 @@ const escape = (value) => value
   .replace(/'/g, '&apos;')
 
 async function buildRss() {
-  const posts = (await Promise.all(files.map(async (file) => {
-    const fullPath = path.join(BLOG_DIR, file)
-    const { data, content } = matter(fs.readFileSync(fullPath, 'utf8'))
-    const slug = file.replace(/\.mdx$/, '')
-    const date = data.date && !Number.isNaN(Date.parse(data.date)) ? new Date(data.date) : null
+  const posts = loadBlogPosts()
+  if (!posts.length) {
+    console.warn('No MDX posts found under src/blog; skipping RSS generation.')
+    return
+  }
 
-    if (!data.title || !data.summary) return null
+  const errors = posts.flatMap((post) => post.errors.map((error) => `${post.file}: ${error}`))
+  if (errors.length) {
+    throw new Error(`Frontmatter validation failed:\n- ${errors.join('\n- ')}`)
+  }
 
-    const contentHtml = await renderMdxToHtml(content, file)
+  const slugs = new Set()
+  for (const post of posts) {
+    if (slugs.has(post.slug)) throw new Error(`Duplicate blog slug detected: ${post.slug}`)
+    slugs.add(post.slug)
+  }
 
+  const rendered = (await Promise.all(posts.map(async (post) => {
+    const contentHtml = await renderMdxToHtml(post.body, post.file)
+    const date = new Date(post.frontmatter.date)
     return {
-      title: String(data.title),
-      link: `${siteUrl}/blog/${slug}`,
-      guid: `${siteUrl}/blog/${slug}`,
-      description: String(data.summary),
+      slug: post.slug,
+      title: String(post.frontmatter.title),
+      author: String(post.frontmatter.author),
+      tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : [],
+      link: `${siteUrl}/blog/${post.slug}`,
+      guid: `${siteUrl}/blog/${post.slug}`,
+      description: String(post.frontmatter.summary),
       content: contentHtml,
-      pubDate: date ? date.toUTCString() : new Date().toUTCString(),
+      pubDate: Number.isNaN(date.getTime()) ? new Date() : date,
     }
-  }))).filter(Boolean).sort((a, b) => Date.parse(b.pubDate) - Date.parse(a.pubDate))
+  }))).sort((a, b) => Number(b.pubDate) - Number(a.pubDate))
+
+  const lastBuildDate = rendered.length
+    ? new Date(Math.max(...rendered.map((post) => Number(post.pubDate))))
+    : new Date(0)
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -96,15 +111,17 @@ async function buildRss() {
     <link>${siteUrl}/blog</link>
     <description>Build logs, architecture notes, and experiments from the MicroAlchemy team.</description>
     <language>en</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    ${posts.map((post) => `
+    <lastBuildDate>${lastBuildDate.toUTCString()}</lastBuildDate>
+    ${rendered.map((post) => `
     <item>
       <title>${escape(post.title)}</title>
       <link>${post.link}</link>
-      <guid>${post.guid}</guid>
+      <guid isPermaLink="true">${post.guid}</guid>
+      <author>${escape(post.author)}</author>
+      ${post.tags.map((tag) => `<category>${escape(tag)}</category>`).join('')}
       <description>${escape(post.description)}</description>
       <content:encoded><![CDATA[${post.content}]]></content:encoded>
-      <pubDate>${post.pubDate}</pubDate>
+      <pubDate>${post.pubDate.toUTCString()}</pubDate>
     </item>`).join('')}
   </channel>
 </rss>
@@ -112,7 +129,7 @@ async function buildRss() {
 
   if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true })
   fs.writeFileSync(OUTPUT_PATH, rss.trim() + '\n', 'utf8')
-  console.log(`RSS feed written to ${OUTPUT_PATH} (${posts.length} item${posts.length === 1 ? '' : 's'})`)
+  console.log(`RSS feed written to ${OUTPUT_PATH} (${rendered.length} item${rendered.length === 1 ? '' : 's'})`)
 }
 
 buildRss().catch((err) => {
