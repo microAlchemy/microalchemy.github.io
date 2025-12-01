@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "lint:blog": "node scripts/check-blog-frontmatter.mjs",
     "rss": "node scripts/generate-rss.mjs",
-    "check": "npm run build && git diff --exit-code --stat",
+    "check": "npm run build && (git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git diff --exit-code --stat || echo \"Skipping git diff (repository not available)\")",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
