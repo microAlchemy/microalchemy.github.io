@@ -14,8 +14,8 @@ type MdxModule = {
 
 type RawFrontmatter = Partial<BlogFrontmatter> & { slug?: string }
 
-const eagerFrontmatter = import.meta.glob('./*.mdx', { eager: true, import: 'frontmatter' }) as Record<string, RawFrontmatter | undefined>
-const lazyPosts = import.meta.glob('./*.mdx')
+const frontmatterImports = import.meta.glob<{ frontmatter?: RawFrontmatter }>('./*.mdx', { import: 'frontmatter' })
+const componentImports = import.meta.glob<MdxModule>('./*.mdx')
 
 export type BlogPostEntry = {
   slug: string
@@ -63,20 +63,18 @@ const normalizeFrontmatter = (slug: string, frontmatter?: RawFrontmatter): BlogF
 
 const seenSlugs = new Set<string>()
 
-export const posts: BlogPostEntry[] = Object.entries(eagerFrontmatter)
-  .map(([path]) => {
-    const slug = path.replace('./', '').replace(/\.mdx$/, '')
-    if (seenSlugs.has(slug)) throw new Error(`Duplicate blog slug detected: ${slug}`)
-    seenSlugs.add(slug)
-    const importer = (lazyPosts[path] ?? lazyPosts[`./${slug}.mdx`]) as () => Promise<MdxModule>
-    const fm = eagerFrontmatter[path]
-    return {
-      slug,
-      import: importer,
-      frontmatter: normalizeFrontmatter(slug, fm),
-    }
-  })
-  .sort((a, b) => {
+const loadPosts = async (): Promise<BlogPostEntry[]> => {
+  const entries = await Promise.all(
+    Object.entries(frontmatterImports).map(async ([path, loader]) => {
+      const slug = path.replace('./', '').replace(/\.mdx$/, '')
+      const fmModule = await loader()
+      const fm = fmModule?.frontmatter
+      const importer = (componentImports[path] ?? componentImports[`./${slug}.mdx`]) as () => Promise<MdxModule>
+      return { slug, frontmatter: normalizeFrontmatter(slug, fm), import: importer }
+    }),
+  )
+
+  const posts = entries.sort((a, b) => {
     const da = Date.parse(a.frontmatter.date)
     const db = Date.parse(b.frontmatter.date)
     if (!Number.isNaN(db) && !Number.isNaN(da)) return db - da
@@ -84,5 +82,15 @@ export const posts: BlogPostEntry[] = Object.entries(eagerFrontmatter)
     if (!Number.isNaN(da)) return -1
     return a.slug.localeCompare(b.slug)
   })
+
+  posts.forEach((post) => {
+    if (seenSlugs.has(post.slug)) throw new Error(`Duplicate blog slug detected: ${post.slug}`)
+    seenSlugs.add(post.slug)
+  })
+
+  return posts
+}
+
+export const posts: BlogPostEntry[] = await loadPosts()
 
 export const findPost = (slug: string) => posts.find((post) => post.slug === slug)
