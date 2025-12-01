@@ -25,6 +25,12 @@ npm run build
 npm run preview
 ```
 
+## CI and testing
+
+- Requires Node 18+ (see `.nvmrc`).
+- `npm run check` mirrors CI by building (with frontmatter lint + RSS) and asserting tracked files stay clean.
+- Docker parity: `docker build -f docker/ci.Dockerfile .` runs lint + build in a Node 20 container.
+
 ## Content updates
 
 - Hero copy, product links, investors, partners, and team members live in `src/components/CircuitBoardAnimation.tsx`.
