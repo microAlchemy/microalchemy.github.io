@@ -100,6 +100,10 @@ async function buildRss() {
     }
   }))).sort((a, b) => Number(b.pubDate) - Number(a.pubDate))
 
+  const lastBuildDate = rendered.length
+    ? new Date(Math.max(...rendered.map((post) => Number(post.pubDate))))
+    : new Date(0)
+
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
@@ -107,7 +111,7 @@ async function buildRss() {
     <link>${siteUrl}/blog</link>
     <description>Build logs, architecture notes, and experiments from the MicroAlchemy team.</description>
     <language>en</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${lastBuildDate.toUTCString()}</lastBuildDate>
     ${rendered.map((post) => `
     <item>
       <title>${escape(post.title)}</title>
