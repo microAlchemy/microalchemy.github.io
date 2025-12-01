@@ -1,36 +1,38 @@
 {
-  "name": "circuit-board-animation",
+  "name": "microalchemy-site",
   "version": "1.0.0",
-  "description": "A React app with cool circuit board animation",
+  "description": "MicroAlchemy marketing site and MDX blog",
   "main": "index.js",
-  "homepage": "https://munchie-babbit.github.io/microalchemy-xyz",
+  "homepage": "https://microalchemy.github.io",
   "scripts": {
     "dev": "vite",
-    "prebuild": "npm run lint:blog",
+    "prebuild": "npm run lint:blog && npm run rss",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint:blog": "node scripts/check-blog-frontmatter.mjs",
+    "rss": "node scripts/generate-rss.mjs",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@mdx-js/react": "^3.0.1",
-    "react-router-dom": "^6.23.1",
+    "@tabler/icons": "^3.35.0",
+    "framer-motion": "^10.16.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "framer-motion": "^10.16.4"
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
+    "@mdx-js/rollup": "^3.0.1",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
-    "@mdx-js/rollup": "^3.0.1",
+    "gh-pages": "^6.1.1",
     "gray-matter": "^4.0.3",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
-    "gh-pages": "^6.1.1",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "vite": "^7.2.6"
   }
 }

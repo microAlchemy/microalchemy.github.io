@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>MicroAlchemy Blog</title>
+    <link>https://microalchemy.github.io/blog</link>
+    <description>Build logs, architecture notes, and experiments from the MicroAlchemy team.</description>
+    <language>en</language>
+    <lastBuildDate>Mon, 01 Dec 2025 08:53:04 GMT</lastBuildDate>
+    
+    <item>
+      <title>Microalchemy Primer</title>
+      <link>https://microalchemy.github.io/blog/primer</link>
+      <guid>https://microalchemy.github.io/blog/primer</guid>
+      <description>Why we are compressing silicon prototyping timelines and how we plan to ship it.</description>
+      <pubDate>Thu, 27 Nov 2025 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

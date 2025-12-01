@@ -1,72 +1,39 @@
-# Circuit Board Animation
+# MicroAlchemy
 
-A React application featuring a cool animated circuit board pattern that's responsive for mobile screens.
+Marketing site and MDX blog for MicroAlchemy, built with Vite + React + TypeScript.
 
-## Features
+## What's inside
 
-- Dynamic circuit board animation with animated path drawing
-- Responsive design that adapts to different screen sizes
-- Mobile-optimized touch interactions
-- TypeScript support
-- Automatic regeneration on window resize
+- Animated circuit-board hero with framer-motion reveals and SVG wiring.
+- Product, investor, partner, and team cards configured in `src/components/CircuitBoardAnimation.tsx`.
+- MDX-powered blog (see `src/blog`) with automatic frontmatter export, linting, and an RSS feed (`/rss.xml`).
+- Routing with `react-router-dom` for the home page and blog detail pages.
 
-## Getting Started
+## Getting started
 
-### Prerequisites
-
-Make sure you have Node.js installed on your machine.
-
-### Installation
-
-1. Install dependencies:
 ```bash
 npm install
-```
-
-2. Start the development server:
-```bash
 npm run dev
 ```
 
-3. Open your browser and navigate to the URL shown in the terminal (usually `http://localhost:5173`)
-
-### Building for Production
+Build, preview, and refresh supporting files:
 
 ```bash
+npm run lint:blog   # frontmatter validation
+npm run rss         # regenerate RSS feed
 npm run build
-```
-
-### Preview Production Build
-
-```bash
 npm run preview
 ```
 
-## How It Works
+## Content updates
 
-The animation creates a grid-based circuit board effect by:
+- Hero copy, product links, investors, partners, and team members live in `src/components/CircuitBoardAnimation.tsx`.
+- Blog posts are in `src/blog/*.mdx`; frontmatter must include `title`, `date`, `author`, and `summary`. `npm run lint:blog` will enforce this.
+- The RSS feed is generated from MDX frontmatter via `npm run rss` (also run automatically before builds).
 
-1. Dividing the screen into a grid of cells
-2. Generating random wire paths that connect multiple cells
-3. Drawing SVG paths with animated stroke effects
-4. Adding connection points (circles) at the start and end of each wire
-5. Automatically regenerating the pattern when the window is resized
+## Project structure
 
-## Customization
-
-You can modify the animation settings in `src/components/CircuitBoardAnimation.tsx`:
-
-- `size`: Grid cell size (default: 10)
-- `leave`: Spacing between wires (default: 10)
-- `wireMaxLen`: Maximum length of each wire (default: 40)
-- `stroke`: Wire color (default: '#ff9f43')
-- `fill`: Background color (default: '#10ac84')
-
-## Mobile Responsiveness
-
-The application includes several mobile optimizations:
-
-- Dynamic viewport height support (`100dvh`)
-- Touch action handling for smooth interactions
-- Responsive breakpoints for different screen sizes
-- Automatic regeneration on orientation change 
+- `src/main.tsx` wires up routes.
+- `src/App.tsx` renders the hero experience.
+- `src/routes/BlogIndex.tsx` and `src/routes/BlogPost.tsx` handle the blog index/post views with shared styles in `src/routes/blog.css`.
+- `scripts/check-blog-frontmatter.mjs` validates MDX metadata; `scripts/generate-rss.mjs` emits `public/rss.xml`.

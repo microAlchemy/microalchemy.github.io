@@ -98,7 +98,7 @@
 }
 
 .text-content-inner {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   background: rgb(var(--color-night-rgb) / 0.95);
   border: 2px solid var(--color-gold-solid);
   border-radius: 0;
@@ -108,7 +108,7 @@
 }
 
 .title {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 1.75rem;
   font-weight: 400;
   color: var(--color-gold-solid);
@@ -182,13 +182,14 @@
 
 .expertise {
   margin: 3rem 0;
+  padding-top: 1rem;
   position: relative;
 }
 
 .expertise::before {
   content: '';
   position: absolute;
-  top: -1.5rem;
+  top: 0;
   left: 0;
   width: 100%;
   height: 1px;
@@ -196,7 +197,7 @@
 }
 
 .subtitle {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 1rem;
   font-weight: 400;
   color: var(--color-gold-solid);
@@ -240,6 +241,7 @@
 
 .product-grid {
   margin-top: 1rem;
+  width: 100%;
 }
 
 .product-card {
@@ -260,9 +262,33 @@
 }
 
 .product-name {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 1rem;
   color: var(--color-gold-solid);
+}
+
+.product-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.product-icon-svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+}
+
+.product-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(0.8);
 }
 
 .product-desc {
@@ -366,7 +392,7 @@
 }
 
 .team-name {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 1rem;
   margin: 0;
   color: var(--color-white);
@@ -402,6 +428,7 @@
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
+  width: 100%;
 }
 
 .partner-card {
@@ -415,6 +442,7 @@
   background: rgb(var(--color-gold) / 0.05);
   border-radius: 0;
   width: 240px;
+  max-width: 100%;
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s ease, transform 0.2s ease;
@@ -463,7 +491,7 @@
 }
 
 .partner-name {
-  font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.95rem;
   color: var(--color-white);
 }
@@ -517,6 +545,7 @@
 
 .blog-cta {
   margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .blog-cta-link {
@@ -538,6 +567,10 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .text-overlay {
+    padding: 2rem 0;
+  }
+
   .text-content {
     padding: 0.8rem;
     margin: 1rem;
@@ -549,11 +582,12 @@
   }
 
   .title-row {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 0.5rem;
   }
 
   .title {
-    font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 1.4rem;
   }
 
@@ -563,7 +597,7 @@
   }
 
   .subtitle {
-    font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
@@ -571,6 +605,10 @@
   .description {
     font-size: 0.8rem;
     margin-bottom: 2rem;
+  }
+
+  .blog-cta {
+    margin-bottom: 1.25rem;
   }
 
   .footer {
@@ -601,14 +639,29 @@
 
   .partners-grid {
     flex-direction: column;
+    width: 100%;
   }
 
   .partner-card {
     width: 100%;
+    max-width: 100%;
+  }
+
+  .product-grid {
+    width: 100%;
+  }
+
+  .partner-card.product-card,
+  .product-card {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
+  .text-overlay {
+    padding: 1.5rem 0;
+  }
+
   .text-content {
     padding: 0.6rem;
     margin: 0.5rem;
@@ -623,7 +676,7 @@
   }
 
   .title {
-    font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 1.2rem;
     letter-spacing: 1px;
   }
@@ -634,7 +687,7 @@
   }
 
   .subtitle {
-    font-family: 'Azeret Mono', 'Space Mono', 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     margin-bottom: 1rem;
   }

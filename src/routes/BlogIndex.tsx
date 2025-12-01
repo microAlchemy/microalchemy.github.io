@@ -27,6 +27,9 @@ const BlogIndex: React.FC = () => {
             <Link to="/" className="ghost-link">
               ← Back home
             </Link>
+            <a href="/rss.xml" className="ghost-link">
+              RSS feed
+            </a>
           </div>
         </div>
 

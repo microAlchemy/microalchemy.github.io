@@ -85,6 +85,9 @@ const BlogPost: React.FC = () => {
             <Link to="/" className="ghost-link">
               Home
             </Link>
+            <a href="/rss.xml" className="ghost-link">
+              RSS
+            </a>
           </div>
         </div>
 
