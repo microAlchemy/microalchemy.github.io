@@ -14,7 +14,7 @@ type MdxModule = {
 
 type RawFrontmatter = Partial<BlogFrontmatter> & { slug?: string }
 
-const frontmatterImports = import.meta.glob<RawFrontmatter>('./*.mdx', { import: 'frontmatter' })
+const frontmatterImports = import.meta.glob<RawFrontmatter>('./*.mdx', { import: 'frontmatter', eager: true })
 const componentImports = import.meta.glob<MdxModule>('./*.mdx')
 
 export type BlogPostEntry = {
@@ -63,17 +63,13 @@ const normalizeFrontmatter = (slug: string, frontmatter?: RawFrontmatter): BlogF
 
 const seenSlugs = new Set<string>()
 
-const loadPosts = async (): Promise<BlogPostEntry[]> => {
-  const entries = await Promise.all(
-    Object.entries(frontmatterImports).map(async ([path, loader]) => {
-      const slug = path.replace('./', '').replace(/\.mdx$/, '')
-      const fm = await loader()
-      const importer = (componentImports[path] ?? componentImports[`./${slug}.mdx`]) as () => Promise<MdxModule>
-      return { slug, frontmatter: normalizeFrontmatter(slug, fm), import: importer }
-    }),
-  )
-
-  const posts = entries.sort((a, b) => {
+export const posts: BlogPostEntry[] = Object.entries(frontmatterImports)
+  .map(([path, fm]) => {
+    const slug = path.replace('./', '').replace(/\.mdx$/, '')
+    const importer = (componentImports[path] ?? componentImports[`./${slug}.mdx`]) as () => Promise<MdxModule>
+    return { slug, frontmatter: normalizeFrontmatter(slug, fm), import: importer }
+  })
+  .sort((a, b) => {
     const da = Date.parse(a.frontmatter.date)
     const db = Date.parse(b.frontmatter.date)
     if (!Number.isNaN(db) && !Number.isNaN(da)) return db - da
@@ -82,14 +78,9 @@ const loadPosts = async (): Promise<BlogPostEntry[]> => {
     return a.slug.localeCompare(b.slug)
   })
 
-  posts.forEach((post) => {
-    if (seenSlugs.has(post.slug)) throw new Error(`Duplicate blog slug detected: ${post.slug}`)
-    seenSlugs.add(post.slug)
-  })
-
-  return posts
-}
-
-export const posts: BlogPostEntry[] = await loadPosts()
+posts.forEach((post) => {
+  if (seenSlugs.has(post.slug)) throw new Error(`Duplicate blog slug detected: ${post.slug}`)
+  seenSlugs.add(post.slug)
+})
 
 export const findPost = (slug: string) => posts.find((post) => post.slug === slug)
