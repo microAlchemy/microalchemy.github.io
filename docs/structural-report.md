@@ -1,17 +1,15 @@
 # Structural Weakness Report
 
-Date: 2025-12-01
+Date: 2025-12-01 (re-evaluated)
 
-## Findings
-- Deployment-only workflow leaves main unguarded; there is no CI gate for lint/build or an easy local/containers parity check before deploying.
-- Blog content validation is duplicated and permissive (no slug uniqueness, weak type checks), so malformed frontmatter can ship and break runtime imports or the RSS feed.
-- RSS output drifts easily (last build timestamp in the checked-in `public/rss.xml` is stale and the feed omits author/tags metadata), with no guardrails to keep it fresh.
-- Lazy-loaded MDX posts lack an error boundary, so a bad post import renders a blank screen instead of a clear failure.
-- Missing `.editorconfig`/`.gitattributes` means line endings and formatting churn across environments (current CRLF-only diffs are a symptom).
+## Resolved
+- CI guardrails now exist (lint:blog + RSS + build) via `.github/workflows/ci.yml`, with `npm run check` and a Dockerfile for parity.
+- Blog frontmatter validation is centralized and strict (required fields, slug uniqueness, tag types) and reused by both the linter and RSS generator; runtime also throws on invalid data.
+- RSS feed is richer (author/categories) and regenerated via `prebuild`; the feed file is no longer tracked in git to avoid timestamp drift.
+- Blog post rendering is wrapped in an error boundary so MDX import/render issues surface clearly.
+- `.editorconfig` and `.gitattributes` are present to normalize line endings/formatting; `.nvmrc` documents Node 18+.
+- Oversized hero/team media trimmed (Aditya portrait ~17MB → ~184KB) to keep bundle size reasonable.
+- Posts loader now uses a single dynamic glob (no eager + lazy duplication), removing Vite double-import warnings and keeping RSS/slugs deduplicated.
 
-## Next actions
-- Add a CI workflow (and a local/Docker path) that runs lint, frontmatter checks, RSS generation, and the build on PRs and protected branches.
-- Centralize and harden blog frontmatter validation (including slug uniqueness) and reuse it for RSS generation and runtime normalization.
-- Regenerate the RSS feed with richer metadata and ensure build steps keep it current.
-- Introduce an error boundary around MDX post loading to surface failures gracefully.
-- Lock in repository formatting defaults to prevent cross-platform diffs.
+## Remaining risks / follow-ups
+- Enforce Node 18+ everywhere (CI already does; local dev on older runtimes still fails). Consider a preflight that checks engines before scripts run.
