@@ -14,7 +14,7 @@ type MdxModule = {
 
 type RawFrontmatter = Partial<BlogFrontmatter> & { slug?: string }
 
-const frontmatterImports = import.meta.glob<{ frontmatter?: RawFrontmatter }>('./*.mdx', { import: 'frontmatter' })
+const frontmatterImports = import.meta.glob<RawFrontmatter>('./*.mdx', { import: 'frontmatter' })
 const componentImports = import.meta.glob<MdxModule>('./*.mdx')
 
 export type BlogPostEntry = {
@@ -67,8 +67,7 @@ const loadPosts = async (): Promise<BlogPostEntry[]> => {
   const entries = await Promise.all(
     Object.entries(frontmatterImports).map(async ([path, loader]) => {
       const slug = path.replace('./', '').replace(/\.mdx$/, '')
-      const fmModule = await loader()
-      const fm = fmModule?.frontmatter
+      const fm = await loader()
       const importer = (componentImports[path] ?? componentImports[`./${slug}.mdx`]) as () => Promise<MdxModule>
       return { slug, frontmatter: normalizeFrontmatter(slug, fm), import: importer }
     }),
