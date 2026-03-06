@@ -312,6 +312,15 @@ const CircuitBoardAnimation: React.FC = () => {
                     <p className="team-title">{member.title}</p>
                   </motion.a>
                 ))}
+                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+                  <Link to="/careers" className="card team-card team-card-cta">
+                    <div className="card-logo team-photo team-photo-cta" aria-hidden="true">
+                      Your Face Here
+                    </div>
+                    <h3 className="team-name">Join the team</h3>
+                    <p className="team-title">See open roles and apply</p>
+                  </Link>
+                </motion.div>
               </div>
             </Section>
 

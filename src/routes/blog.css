@@ -75,6 +75,10 @@
   gap: 1.2rem;
 }
 
+.jobs-grid {
+  align-items: stretch;
+}
+
 .blog-card {
   display: block;
   text-decoration: none;
@@ -83,6 +87,12 @@
   background: rgba(3, 25, 17, 0.7);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   color: var(--color-white);
+}
+
+.job-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .blog-card:hover {
@@ -101,6 +111,13 @@
   color: #c9d6d0;
   margin: 0.25rem 0 0.8rem 0;
   line-height: 1.6;
+}
+
+.blog-card-action {
+  margin-top: auto;
+  color: rgba(212, 175, 55, 0.95);
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
 }
 
 .blog-card-author {
@@ -201,6 +218,51 @@
   color: #cddad3;
 }
 
+.jobs-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.jobs-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 220px;
+  color: #d7dfd8;
+}
+
+.jobs-control span {
+  font-size: 0.9rem;
+  color: rgba(212, 175, 55, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.jobs-control select {
+  appearance: none;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: rgba(3, 25, 17, 0.78);
+  color: var(--color-white);
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+}
+
+.job-apply-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 880px;
+  margin: 0 auto 1.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: rgba(212, 175, 55, 0.08);
+  color: #eef2ec;
+}
+
 .blog-not-found {
   max-width: 640px;
   margin: 2rem auto;
@@ -266,5 +328,13 @@
 
   .blog-article {
     padding: 1.4rem 1.2rem;
+  }
+
+  .jobs-control {
+    min-width: 100%;
+  }
+
+  .job-apply-strip {
+    align-items: flex-start;
   }
 }

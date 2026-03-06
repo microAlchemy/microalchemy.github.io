@@ -236,6 +236,11 @@
   gap: 0.9rem;
 }
 
+.team-card-cta {
+  min-height: 100%;
+  justify-content: center;
+}
+
 .team-card .team-name,
 .team-card .team-title {
   width: 100%;
@@ -260,6 +265,11 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--color-gold-solid);
+}
+
+.team-photo-cta {
+  border-style: dashed;
+  background: rgb(var(--color-gold) / 0.08);
 }
 
 .team-photo.has-image {
