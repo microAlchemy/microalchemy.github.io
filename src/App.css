@@ -226,13 +226,20 @@
 }
 
 .team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.5rem;
+}
+
+.team-grid > * {
+  flex: 0 1 220px;
+  max-width: 220px;
 }
 
 .team-card {
   width: 100%;
+  max-width: 220px;
   gap: 0.9rem;
 }
 
@@ -538,6 +545,16 @@
   }
 
   .card.product {
+    max-width: 100%;
+  }
+
+  .team-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .team-grid > * {
+    flex-basis: 100%;
     max-width: 100%;
   }
 }
