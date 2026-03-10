@@ -11,6 +11,13 @@ import kunalPhoto from '../img/team/kunal.jpg'
 import saifPhoto from '../img/team/saif.jpg'
 import iconStore from '@tabler/icons/outline/building-store.svg'
 import iconFactory from '@tabler/icons/outline/building-factory-2.svg'
+import { posts } from '../blog/posts'
+import {
+  generateCircuitScene,
+  getCircuitAnimationEndMs,
+  getCircuitSeed,
+  renderCircuitFrame,
+} from './circuitScene'
 
 type Card = {
   name: string
@@ -24,7 +31,27 @@ type Card = {
   ctaText?: string
 }
 
-type TeamMember = { name: string; title: string; photo?: string; url: string }
+type TeamMember = {
+  name: string
+  title: string
+  photo?: string
+  url: string
+}
+
+type NewsEntry = {
+  slug: string
+  title: string
+  date: string
+  summary: string
+}
+
+type Palette = {
+  wire: string
+  node: string
+  ring: string
+}
+
+const RESIZE_DEBOUNCE_MS = 120
 
 const investors: Card[] = [
   { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
@@ -74,100 +101,116 @@ const team: TeamMember[] = [
   { name: 'Saif Khattak', title: 'Chief Software Officer', photo: saifPhoto, url: 'https://www.linkedin.com/in/skhattak00/' },
 ]
 
-const { floor, random } = Math
-const settings = { size: 10, leave: 10, wireMaxLen: 40, maxWires: 600 }
+const newsPosts: NewsEntry[] = posts
+  .filter((post) => post.frontmatter.tags.some((tag) => tag.toLowerCase() === 'news'))
+  .slice(0, 3)
+  .map((post) => ({
+    slug: post.slug,
+    title: post.frontmatter.title,
+    date: post.frontmatter.date,
+    summary: post.frontmatter.summary,
+  }))
 
-type Palette = { wire: string; node: string; ring: string; white: string }
+const getCircuitPalette = (): Palette => {
+  if (typeof window === 'undefined') {
+    return { wire: '#d4af37', node: '#f5f1e0', ring: '#ffffff' }
+  }
 
-const palette = () => {
-  if (typeof window === 'undefined')
-    return { wire: '#d4af37', node: '#f5f1e0', ring: '#ffffff', white: '#ffffff' }
-  const s = getComputedStyle(document.documentElement)
-  const read = (prop: string, fallback: string) => s.getPropertyValue(prop).trim() || fallback
+  const styles = getComputedStyle(document.documentElement)
+  const readColor = (prop: string, fallback: string) => styles.getPropertyValue(prop).trim() || fallback
+
   return {
-    wire: read('--color-circuit-wire', '#d4af37'),
-    node: read('--color-circuit-node', '#f5f1e0'),
-    ring: read('--color-circuit-ring', '#ffffff'),
-    white: read('--color-white', '#ffffff'),
+    wire: readColor('--color-circuit-wire', '#d4af37'),
+    node: readColor('--color-circuit-node', '#f5f1e0'),
+    ring: readColor('--color-circuit-ring', '#ffffff'),
   }
 }
 
-class Cell {
-  x = 0; y = 0; available = true; dirInd = floor(random() * 8)
-  constructor(x: number, y: number) { this.x = x; this.y = y }
+const configureCanvas = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const pixelRatio = window.devicePixelRatio || 1
+  canvas.width = Math.max(1, Math.floor(width * pixelRatio))
+  canvas.height = Math.max(1, Math.floor(height * pixelRatio))
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
 }
 
-class Wire {
-  cells: Cell[] = []
-  constructor(start: Cell) { start.available = false; this.cells.push(start) }
+const useCircuitCanvas = (
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+) => {
+  const animationFrameRef = useRef<number | null>(null)
+  const resizeTimeoutRef = useRef<number | null>(null)
+  const initialRenderRef = useRef<number | null>(null)
 
-  noCross(c: Cell, d: number, map: Record<string, Cell>) {
-    if ([0, 2, 4, 6].includes(d)) return true
-    const checks: Record<number, [string, string]> = {
-      1: [`${c.x},${c.y - 1}`, `${c.x + 1},${c.y}`],
-      3: [`${c.x + 1},${c.y}`, `${c.x},${c.y + 1}`],
-      5: [`${c.x - 1},${c.y}`, `${c.x},${c.y + 1}`],
-      7: [`${c.x - 1},${c.y}`, `${c.x},${c.y - 1}`],
+  useEffect(() => {
+    const cancelScheduledWork = () => {
+      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
+      if (initialRenderRef.current) window.cancelAnimationFrame(initialRenderRef.current)
+      if (animationFrameRef.current) window.cancelAnimationFrame(animationFrameRef.current)
     }
-    const [a, b] = checks[d]
-    return (map[a]?.available ?? true) && (map[b]?.available ?? true)
-  }
 
-  generate(cells: Cell[], map: Record<string, Cell>, rows: number, cols: number) {
-    const dirs = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
-    while (this.cells.length < settings.wireMaxLen) {
-      let tried = 0
-      while (tried < dirs.length) {
-        const last = this.cells[this.cells.length - 1]
-        const dirInd = (last.dirInd + tried) % dirs.length
-        const [dx, dy] = dirs[dirInd]
-        const x = last.x + dx
-        const y = last.y + dy
-        const idx = y * cols + x
-        if (x < 0 || x >= cols || y < 0 || y >= rows || idx < 0 || idx >= cells.length) { tried += 1; continue }
-        const next = cells[idx]
-        if (!next.available || !this.noCross(last, dirInd, map)) { tried += 1; continue }
-        next.available = false; next.dirInd = dirInd; this.cells.push(next); break
+    const renderCircuit = () => {
+      const container = containerRef.current
+      const canvas = canvasRef.current
+      if (!container || !canvas) return
+
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      if (animationFrameRef.current) window.cancelAnimationFrame(animationFrameRef.current)
+
+      const { width, height } = container.getBoundingClientRect()
+      configureCanvas(canvas, ctx, width, height)
+
+      const scene = generateCircuitScene(width, height, getCircuitSeed(width, height))
+      const palette = getCircuitPalette()
+      const animationEndMs = getCircuitAnimationEndMs(scene)
+      const startTime = performance.now()
+
+      const drawFrame = (now: number) => {
+        renderCircuitFrame(ctx, scene, palette, now - startTime)
+        if (now - startTime < animationEndMs) {
+          animationFrameRef.current = window.requestAnimationFrame(drawFrame)
+        }
       }
-      if (tried === dirs.length) break
+
+      animationFrameRef.current = window.requestAnimationFrame(drawFrame)
     }
-  }
 
-  draw(svg: SVGSVGElement, colors: Palette) {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-    const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-    const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-    const s = settings.size; const r = s / 3
-    c1.setAttribute('r', `${r}`); c2.setAttribute('r', `${r}`)
-    c1.setAttribute('stroke', colors.ring); c2.setAttribute('stroke', colors.ring)
-    c1.setAttribute('fill', colors.node); c2.setAttribute('fill', colors.node)
-    c1.setAttribute('opacity', '0'); c2.setAttribute('opacity', '0')
-    c1.classList.add('animated-dot'); c2.classList.add('animated-dot')
+    const handleResize = () => {
+      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = window.setTimeout(renderCircuit, RESIZE_DEBOUNCE_MS)
+    }
 
-    let d = ''
-    this.cells.forEach((cell, i) => {
-      const cx = cell.x * s + s / 2
-      const cy = cell.y * s + s / 2
-      if (i === 0) { d += `M ${cx} ${cy}`; c1.setAttribute('cx', `${cx}`); c1.setAttribute('cy', `${cy}`); c1.style.transformOrigin = `${cx}px ${cy}px` }
-      d += ` L ${cx} ${cy}`
-      if (i === this.cells.length - 1) { c2.setAttribute('cx', `${cx}`); c2.setAttribute('cy', `${cy}`); c2.style.transformOrigin = `${cx}px ${cy}px` }
-    })
+    initialRenderRef.current = window.requestAnimationFrame(renderCircuit)
+    window.addEventListener('resize', handleResize)
 
-    path.setAttribute('d', d)
-    path.setAttribute('fill', 'none')
-    path.setAttribute('stroke', colors.wire)
-    path.setAttribute('stroke-width', `${settings.size / 4}`)
-    const length = path.getTotalLength()
-    path.setAttribute('stroke-dasharray', `${length}, ${length}`)
-    path.setAttribute('stroke-dashoffset', `${length}`)
-    path.classList.add('animated-path')
-    path.style.animationDelay = '1s'
-    svg.append(path, c1, c2)
-  }
+    return () => {
+      cancelScheduledWork()
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [canvasRef, containerRef])
 }
 
-const fadeIn = (delay: number): MotionProps => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay, ease: [0.25, 0.25, 0.25, 1] } })
-const reveal = (delay: number): MotionProps => ({ initial: { opacity: 0, scale: 0.95, y: 20 }, animate: { opacity: 1, scale: 1, y: 0 }, transition: { duration: 0.8, delay, ease: [0.25, 0.25, 0.25, 1] } })
+const fadeIn = (delay: number): MotionProps => ({
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay, ease: [0.25, 0.25, 0.25, 1] },
+})
+
+const reveal = (delay: number): MotionProps => ({
+  initial: { opacity: 0, scale: 0.95, y: 20 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  transition: { duration: 0.8, delay, ease: [0.25, 0.25, 0.25, 1] },
+})
+
+const formatDate = (value?: string) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
 const Section: React.FC<{ title: string; delay: number; className?: string; children: React.ReactNode }> = ({ title, delay, className = '', children }) => (
   <motion.section className={className} {...fadeIn(delay)}>
@@ -178,89 +221,49 @@ const Section: React.FC<{ title: string; delay: number; className?: string; chil
 
 const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: string }> = ({ items, className = '', cardClassName = '' }) => (
   <div className={`cards-grid ${className}`.trim()}>
-    {items.map((item) => (
-      <a
-        key={item.name}
-        className={`card${cardClassName ? ` ${cardClassName}` : ''}${item.cta ? ' card-cta' : ''}${item.logoType === 'none' ? ' card-icon-only' : ''}`}
-        href={item.url}
-        target={item.url.startsWith('http') ? '_blank' : undefined}
-        rel={item.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-      >
-        {item.logoType !== 'none' && (
-          <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
-            {item.logoType === 'image' || (!item.logoType && item.logo) ? (
-              item.logo
-                ? <img src={item.logo} alt={`${item.name} logo`} />
-                : (item.logoText ?? 'Logo Placeholder')
-            ) : (
-              item.logoText ?? (item.cta ? 'Get in touch' : 'Logo Placeholder')
-            )}
-          </div>
-        )}
-        <span className="card-name">
-          {item.icon && <span className="product-icon" aria-hidden>{item.icon}</span>}
-          {item.name}
-        </span>
-        {item.description && <p className="product-desc">{item.description}</p>}
-        {item.ctaText && <span className="blog-cta-link product-cta">{item.ctaText}</span>}
-        {item.cta && !item.ctaText && <span className="card-cta-text">Reach out to collaborate</span>}
-      </a>
-    ))}
+    {items.map((item) => {
+      const isExternal = item.url.startsWith('http')
+      const cardClass = `card${cardClassName ? ` ${cardClassName}` : ''}${item.cta ? ' card-cta' : ''}${item.logoType === 'none' ? ' card-icon-only' : ''}`
+
+      return (
+        <a
+          key={item.name}
+          className={cardClass}
+          href={item.url}
+          target={isExternal ? '_blank' : undefined}
+          rel={isExternal ? 'noopener noreferrer' : undefined}
+        >
+          {item.logoType !== 'none' && (
+            <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
+              {item.logoType === 'image' || (!item.logoType && item.logo)
+                ? item.logo
+                  ? <img src={item.logo} alt={`${item.name} logo`} />
+                  : (item.logoText ?? 'Logo Placeholder')
+                : (item.logoText ?? (item.cta ? 'Get in touch' : 'Logo Placeholder'))}
+            </div>
+          )}
+          <span className="card-name">
+            {item.icon && <span className="product-icon" aria-hidden>{item.icon}</span>}
+            {item.name}
+          </span>
+          {item.description && <p className="product-desc">{item.description}</p>}
+          {item.ctaText && <span className="blog-cta-link product-cta">{item.ctaText}</span>}
+          {item.cta && !item.ctaText && <span className="card-cta-text">Reach out to collaborate</span>}
+        </a>
+      )
+    })}
   </div>
 )
 
 const CircuitBoardAnimation: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const generate = () => {
-    const container = containerRef.current
-    const svg = svgRef.current
-    if (!container || !svg) return
-    svg.innerHTML = ''
-    const colors = palette()
-    const { width, height } = container.getBoundingClientRect()
-    svg.setAttribute('width', `${width}`); svg.setAttribute('height', `${height}`)
-
-    const rows = floor(height / settings.size)
-    const cols = floor(width / settings.size)
-    const wireNum = Math.min(settings.maxWires, floor(rows * cols / (settings.wireMaxLen + settings.leave)))
-    const cells: Cell[] = []
-    const map: Record<string, Cell> = {}
-    const wires: Wire[] = []
-
-    for (let y = 0; y < rows; y += 1) for (let x = 0; x < cols; x += 1) {
-      const cell = new Cell(x, y); cells.push(cell); map[`${x},${y}`] = cell
-    }
-
-    while (wires.length < wireNum) {
-      const cell = cells[floor(random() * cells.length)]
-      if (!cell.available) continue
-      const wire = new Wire(cell)
-      wire.generate(cells, map, rows, cols)
-      wire.draw(svg, colors)
-      wires.push(wire)
-    }
-  }
-
-  const resizeTimeoutRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
-      resizeTimeoutRef.current = window.setTimeout(generate, 120)
-    }
-    generate()
-    window.addEventListener('resize', handleResize)
-    return () => {
-      if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current)
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
+  useCircuitCanvas(containerRef, canvasRef)
 
   return (
     <div ref={containerRef} className="circuit-container">
-      <svg ref={svgRef} className="circuit-svg" xmlns="http://www.w3.org/2000/svg" />
+      <canvas ref={canvasRef} className="circuit-canvas" />
       <div className="text-overlay">
         <motion.div className="text-content" {...reveal(2.5)}>
           <div className="text-content-inner">
@@ -332,10 +335,23 @@ const CircuitBoardAnimation: React.FC = () => {
               <CardGrid items={partners} />
             </Section>
 
-            <motion.p className="footer" {...fadeIn(3.9)}>
+            <Section title="News" delay={3.9} className="partners-section">
+              <div className="cards-grid product-grid news-grid">
+                {newsPosts.map((post) => (
+                  <Link key={post.slug} to={`/blog/${post.slug}`} className="card product news-card">
+                    <span className="news-date">{formatDate(post.date) || post.date}</span>
+                    <span className="card-name">{post.title}</span>
+                    <p className="product-desc">{post.summary}</p>
+                    <span className="blog-cta-link product-cta">Read article →</span>
+                  </Link>
+                ))}
+              </div>
+            </Section>
+
+            <motion.p className="footer" {...fadeIn(4)}>
               Stay tuned for more updates and exciting developments.
             </motion.p>
-            <motion.p className="contact" {...fadeIn(4.1)}>
+            <motion.p className="contact" {...fadeIn(4.2)}>
               Email inquiries to <a href="mailto:aditya@microalchemy.xyz" className="email-link">aditya@microalchemy.xyz</a>
             </motion.p>
           </div>

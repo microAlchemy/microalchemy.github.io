@@ -12,7 +12,7 @@
   overflow: visible;
 }
 
-.circuit-svg {
+.circuit-canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -20,32 +20,6 @@
   height: 100%;
   z-index: 1;
   display: block;
-}
-
-@keyframes drawLine {
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes fadeInDot {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animated-path {
-  animation: drawLine 1.5s linear forwards;
-}
-
-.animated-dot {
-  animation: fadeInDot 0.6s ease-out forwards;
-  animation-delay: 0.3s;
 }
 
 /* Text overlay styles */
@@ -181,6 +155,21 @@
 .product-grid {
   margin-top: 1rem;
   width: 100%;
+}
+
+.news-grid {
+  justify-content: flex-start;
+}
+
+.news-card {
+  min-height: 100%;
+}
+
+.news-date {
+  color: var(--color-gold-solid);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .product-icon {
