@@ -1,0 +1,49 @@
+---
+title: Getting our Stack Started
+date: 2025-12-01
+author: Kunal Chandan
+summary: An Overview of Where we are Early Winter
+tags: [web, roadmap]
+---
+
+import Callout from '../components/Callout'
+
+# Overview
+
+This blog will probably have a lot of me rambling.
+
+## MicroCloud
+
+We're building a cloud platform where you can see other projects that are open source, see your existing orders, and make more orders. This is going to be called MicroCloud (unclear if this is internal only or external).
+
+It's been weird getting started on a web project where I really don't have much experience. However buying a lot of tokens has been a bit of a lifesaver. We did have Estelle to thank for our main marketing/homepage at microalchemy.xyz. She did an excellent job on getting us started and made a beautiful website without any help from LLM tools.
+I was able to build on that with the help of various AI tools aka Google's AntiGravity and OpenAI's Codex.
+
+## Note on LLM Tools
+
+Having previously used VSCode Copilot and Cursor, I have to they all kinda suck with Cursor being the best I've used so far. I was also surprised to see that even though I have the $200/month subscription for OpenAI, it doesn't give me access to some amount of API usage! You're locked into using the tools that they make available to you at the generous usage they offer.
+
+From there we also have been working on
+
+<Callout tone="info" title="What we are shipping">
+  Wafers in under three weeks, an open-source analog-first design stack (Alembic), and an ecosystem that
+  keeps the tooling, simulation, and fabrication loop tight.
+</Callout>
+
+## Design loops should be shorter
+
+- Traditional foundries are focused on pushing the economics per transistor rather than design speed
+  - It can take anywhere from three months to a full year to go from a finalized design to a chip in hand at today’s foundries
+- Analog design is still artisanal; we are raising the abstraction with Alembic.
+- Tooling wants to be open; community contributions unlock better models and flows.
+
+## How we approach the stack
+
+1. **Language-first**: Alembic expresses analog intent without drowning in device minutiae.
+2. **Tight simulation**: We validate designs against the exact stack we fab on—no surprises at tapeout.
+3. **Fast fab**: Our process targets a 1μm node with reliable turnaround for experiments and MVP silicon.
+
+<Callout tone="success">
+  You will see progress logs, benchmarks, and build breakdowns here. If you want to collaborate or test on
+  our pipeline, email aditya@microalchemy.xyz
+</Callout>
