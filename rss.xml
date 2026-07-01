@@ -5,8 +5,22 @@
     <link>https://microalchemy.xyz/blog</link>
     <description>Build logs, architecture notes, and experiments from the MicroAlchemy team.</description>
     <language>en</language>
-    <lastBuildDate>Thu, 27 Nov 2025 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 01 Apr 2026 00:00:00 GMT</lastBuildDate>
     
+    <item>
+      <title>MicroAlchemy Announces $1.8M Seed Round</title>
+      <link>https://microalchemy.xyz/blog/seed-funding</link>
+      <guid isPermaLink="true">https://microalchemy.xyz/blog/seed-funding</guid>
+      <author>MicroAlchemy Team</author>
+      <category>funding</category><category>company</category><category>investors</category><category>news</category>
+      <description>MicroAlchemy raises a $1.8M seed round from Golden Ventures</description>
+      <content:encoded><![CDATA[<h1>MicroAlchemy Announces $1.8M Seed Round</h1>
+<p>MicroAlchemy has raised a <strong>$1.8 million seed round</strong> from <a href="https://www.golden.ventures/"><strong>Golden Ventures</strong></a>.</p>
+<p>This funding will help MicroAlchemy accelerate our silicon prototyping roadmap, expand the team, and bring customers onto the platform faster.</p>
+<div class="cards-grid"><a href="https://www.golden.ventures/" target="_blank" rel="noopener noreferrer" class="card"><div class="card-logo has-image"><img src="/investors/golden.svg" alt="Golden Ventures logo"/></div></a></div>
+<p>If you&#x27;d like to partner with us, reach out to <a href="mailto:aditya@microalchemy.xyz">aditya@microalchemy.xyz</a></p>]]></content:encoded>
+      <pubDate>Wed, 01 Apr 2026 00:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Microalchemy Primer</title>
       <link>https://microalchemy.xyz/blog/primer</link>
