@@ -4,6 +4,7 @@ import { motion, type MotionProps } from 'framer-motion'
 import uaLogo from '../img/ua-logo.svg'
 import caffeinatedLogo from '../img/investors/caffeinated.svg'
 import haystackLogo from '../img/investors/haystack.png'
+import goldenLogo from '../img/investors/golden.svg'
 import gtechLogo from '../img/partners/gtech.png'
 import uwaterlooLogo from '../img/partners/uwaterloo.png'
 import adityaPhoto from '../img/team/aditya.jpg'
@@ -56,6 +57,7 @@ const RESIZE_DEBOUNCE_MS = 120
 const investors: Card[] = [
   { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
   { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
+  { name: 'Golden Ventures', url: 'https://www.golden.ventures/', logo: goldenLogo },
 ]
 
 const partners: Card[] = [
@@ -97,7 +99,7 @@ const products: Card[] = [
 
 const team: TeamMember[] = [
   { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto, url: 'https://www.linkedin.com/in/srini-aditya/' },
-  { name: 'Kunal Chandan', title: 'Chief Hardware Officer', photo: kunalPhoto, url: 'https://www.linkedin.com/in/kunal-chandan/' },
+  { name: 'Kunal Chandan', title: 'Chief Technical Officer', photo: kunalPhoto, url: 'https://www.linkedin.com/in/kunal-chandan/' },
   { name: 'Saif Khattak', title: 'Chief Software Officer', photo: saifPhoto, url: 'https://www.linkedin.com/in/skhattak00/' },
 ]
 
