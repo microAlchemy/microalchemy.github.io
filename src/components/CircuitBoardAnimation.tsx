@@ -6,10 +6,11 @@ import caffeinatedLogo from '../img/investors/caffeinated.svg'
 import haystackLogo from '../img/investors/haystack.png'
 import goldenLogo from '../img/investors/golden.svg'
 import gtechLogo from '../img/partners/gtech.png'
+import iisenseLogo from '../img/partners/iisense.png'
 import uwaterlooLogo from '../img/partners/uwaterloo.png'
 import adityaPhoto from '../img/team/aditya.jpg'
 import kunalPhoto from '../img/team/kunal.jpg'
-import saifPhoto from '../img/team/saif.jpg'
+// import saifPhoto from '../img/team/saif.jpg'
 import iconStore from '@tabler/icons/outline/building-store.svg'
 import iconFactory from '@tabler/icons/outline/building-factory-2.svg'
 import { posts } from '../blog/posts'
@@ -61,6 +62,7 @@ const investors: Card[] = [
 ]
 
 const partners: Card[] = [
+  { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo },
   { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
   { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
   { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
@@ -100,7 +102,7 @@ const products: Card[] = [
 const team: TeamMember[] = [
   { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto, url: 'https://www.linkedin.com/in/srini-aditya/' },
   { name: 'Kunal Chandan', title: 'Chief Technical Officer', photo: kunalPhoto, url: 'https://www.linkedin.com/in/kunal-chandan/' },
-  { name: 'Saif Khattak', title: 'Chief Software Officer', photo: saifPhoto, url: 'https://www.linkedin.com/in/skhattak00/' },
+  // { name: 'Saif Khattak', title: 'Director of Software', photo: saifPhoto, url: 'https://www.linkedin.com/in/skhattak00/' },
 ]
 
 const newsPosts: NewsEntry[] = posts
