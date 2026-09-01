@@ -1,0 +1,14 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "microalchemy-intake",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://microalchemy.xyz",
+    "TWENTY_API_URL": "https://crm.microalchemy.xyz",
+    "TWENTY_RESUME_FIELD_UNIVERSAL_IDENTIFIER": "32400a6f-8970-4b3a-8318-818f38627995"
+  }
+}

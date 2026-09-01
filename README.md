@@ -8,6 +8,7 @@ Marketing site and MDX blog for MicroAlchemy, built with Vite + React + TypeScri
 - Product, investor, partner, and team cards configured in `src/components/CircuitBoardAnimation.tsx`.
 - MDX-powered blog (see `src/blog`) with automatic frontmatter export, linting, and an RSS feed (`/rss.xml`).
 - Routing with `react-router-dom` for the home page and blog detail pages.
+- Native applicant, customer, and investor intake forms with a secure Twenty CRM relay.
 
 ## Getting started
 
@@ -23,11 +24,13 @@ npm run lint:blog   # frontmatter validation
 npm run rss         # regenerate RSS feed
 npm run build
 npm run preview
+npm run intake:check
+npm run intake:build
 ```
 
 ## CI and testing
 
-- Requires Node 18+ (see `.nvmrc`).
+- Requires Node 20+ (see `.nvmrc`).
 - `npm run check` mirrors CI by building (with frontmatter lint + RSS) and asserting tracked files stay clean.
 - Docker parity: `docker build -f docker/ci.Dockerfile .` runs lint + build in a Node 20 container.
 
@@ -42,4 +45,7 @@ npm run preview
 - `src/main.tsx` wires up routes.
 - `src/App.tsx` renders the hero experience.
 - `src/routes/BlogIndex.tsx` and `src/routes/BlogPost.tsx` handle the blog index/post views with shared styles in `src/routes/blog.css`.
+- `src/routes/IntakePage.tsx` provides the three public intake paths; `worker/src/index.ts` validates submissions, stores private résumés, and forwards records into Twenty.
 - `scripts/check-blog-frontmatter.mjs` validates MDX metadata; `scripts/generate-rss.mjs` emits `public/rss.xml`.
+
+See `docs/intake-deployment.md` and `docs/twenty-intake-setup.md` for the Cloudflare and CRM setup.

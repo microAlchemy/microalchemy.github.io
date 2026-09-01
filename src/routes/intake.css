@@ -1,0 +1,438 @@
+.intake-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(2, 36, 26, 0.82), rgba(2, 36, 26, 0.97)),
+    repeating-linear-gradient(90deg, transparent 0 79px, rgba(212, 175, 55, 0.06) 80px),
+    var(--color-circuit-bg);
+  color: var(--color-white);
+  padding: 3.5rem 1.5rem 5rem;
+}
+
+.intake-container {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.intake-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.intake-eyebrow,
+.intake-panel-heading > span {
+  color: var(--color-gold-solid);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.intake-header h1 {
+  max-width: 780px;
+  margin: 0.55rem 0 0.8rem;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+  line-height: 1.03;
+  font-weight: 450;
+  letter-spacing: -0.045em;
+  color: #f7f3e8;
+}
+
+.intake-header p {
+  max-width: 720px;
+  color: #cbd8d1;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.intake-nav {
+  display: flex;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.intake-nav a {
+  color: var(--color-white);
+  text-decoration: none;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.intake-nav a:hover,
+.intake-nav a:focus-visible {
+  border-color: var(--color-gold-solid);
+  color: var(--color-gold-solid);
+}
+
+.intake-follow-up span,
+.intake-booking-heading span {
+  color: var(--color-gold-solid);
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.intake-panel {
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: rgba(9, 38, 29, 0.96);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.24);
+}
+
+.intake-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.intake-panel-heading p {
+  color: #9fb0a7;
+  font-size: 0.75rem;
+}
+
+.intake-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.intake-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+.intake-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  color: #eaf0ec;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.intake-field-wide {
+  grid-column: 1 / -1;
+}
+
+.intake-field b,
+.intake-fieldset b,
+.intake-consent b {
+  color: var(--color-gold-solid);
+  font-weight: 500;
+}
+
+.intake-field em {
+  color: #84988e;
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.intake-field-help {
+  margin-top: -0.35rem;
+  color: #91a39a;
+  font-size: 0.75rem;
+}
+
+.intake-field input,
+.intake-field select,
+.intake-field textarea {
+  width: 100%;
+  border: 1px solid rgba(212, 175, 55, 0.34);
+  border-radius: 0;
+  background: rgba(2, 25, 17, 0.78);
+  color: var(--color-white);
+  padding: 0.82rem 0.9rem;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.intake-field textarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.intake-field input[type='file'] {
+  padding: 0.65rem;
+  cursor: pointer;
+}
+
+.intake-field input[type='file']::file-selector-button {
+  margin-right: 0.8rem;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(212, 175, 55, 0.12);
+  color: #fff;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.intake-field input:focus,
+.intake-field select:focus,
+.intake-field textarea:focus {
+  outline: 2px solid var(--color-gold-solid);
+  outline-offset: 2px;
+  border-color: var(--color-gold-solid);
+}
+
+.intake-fieldset {
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  padding: 1.15rem;
+}
+
+.intake-fieldset legend {
+  padding: 0 0.45rem;
+  color: #eaf0ec;
+  font-size: 0.86rem;
+}
+
+.intake-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+}
+
+.intake-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: #cad7d0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.intake-check input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.08rem;
+  accent-color: var(--color-gold-solid);
+  flex: 0 0 auto;
+}
+
+.intake-radio-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.intake-consent {
+  padding-top: 0.25rem;
+}
+
+.intake-honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+}
+
+.intake-turnstile {
+  min-height: 65px;
+  width: min(100%, 420px);
+}
+
+.intake-config-warning {
+  border: 1px solid rgba(252, 191, 73, 0.55);
+  background: rgba(252, 191, 73, 0.08);
+  color: #ffe2a8;
+  padding: 0.85rem 1rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.intake-submit-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 50px;
+}
+
+.intake-submit-row > button {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-gold-solid);
+  border-radius: 0;
+  background: var(--color-gold-solid);
+  color: #10251d;
+  padding: 0.85rem 1.15rem;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.intake-submit-row > button:hover:not(:disabled),
+.intake-submit-row > button:focus-visible:not(:disabled) {
+  background: #efd26f;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.intake-submit-row > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.intake-status {
+  color: #aebdb6;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.intake-status-success {
+  color: #9fe0b4;
+}
+
+.intake-status-error {
+  color: #ffb3a8;
+}
+
+.intake-follow-up {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  border: 1px solid var(--color-gold-solid);
+  background: rgba(212, 175, 55, 0.1);
+  padding: 1.25rem;
+}
+
+.intake-follow-up:focus {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.intake-booking {
+  overflow: hidden;
+  border: 1px solid var(--color-gold-solid);
+  background: #fff;
+}
+
+.intake-booking:focus {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.intake-booking-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem;
+  background: #08291f;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.45);
+}
+
+.intake-booking-heading h2 {
+  margin: 0.35rem 0;
+  color: #f7f3e8;
+  font-size: 1.15rem;
+  font-weight: 550;
+}
+
+.intake-booking-heading p {
+  max-width: 650px;
+  color: #c4d1ca;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.intake-booking-heading a {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-gold-solid);
+  color: var(--color-gold-solid);
+  padding: 0.8rem 1rem;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.intake-booking-heading a:hover,
+.intake-booking-heading a:focus-visible {
+  background: var(--color-gold-solid);
+  color: #10251d;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.intake-booking-frame {
+  display: block;
+  width: 100%;
+  height: 720px;
+  border: 0;
+  background: #fff;
+}
+
+.intake-follow-up h2 {
+  margin: 0.35rem 0;
+  color: #f7f3e8;
+  font-size: 1.15rem;
+  font-weight: 550;
+}
+
+.intake-follow-up p {
+  max-width: 650px;
+  color: #c4d1ca;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.intake-follow-up button {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-gold-solid);
+  background: transparent;
+  color: var(--color-gold-solid);
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.intake-follow-up button:hover,
+.intake-follow-up button:focus-visible {
+  background: var(--color-gold-solid);
+  color: #10251d;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .intake-shell {
+    padding: 2rem 1rem 3.5rem;
+  }
+
+  .intake-header {
+    flex-direction: column;
+  }
+
+  .intake-follow-up,
+  .intake-booking-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .intake-form-grid,
+  .intake-checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .intake-panel-heading,
+  .intake-submit-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .intake-booking-heading a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .intake-booking-frame {
+    height: 780px;
+  }
+}

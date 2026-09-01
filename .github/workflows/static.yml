@@ -39,6 +39,9 @@ jobs:
       # This executes "tsc && vite build" which creates the production assets in the 'dist' directory.
       - name: Build project
         run: npm run build
+        env:
+          VITE_INTAKE_API_URL: ${{ vars.VITE_INTAKE_API_URL }}
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
 
       # 5. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages

@@ -25,7 +25,6 @@ export type JobFrontmatter = {
   location?: string
   employmentType?: string
   workMode?: JobWorkMode
-  formUrl: string
 }
 
 type MdxModule = {
@@ -84,19 +83,6 @@ const normalizeWorkMode = (value: unknown, slug: string) => {
   return workMode as JobWorkMode
 }
 
-const normalizeFormUrl = (value: unknown, slug: string) => {
-  const url = requireString(value, 'formUrl', slug)
-  try {
-    const parsed = new URL(url)
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      throw new Error('protocol')
-    }
-  } catch {
-    throw new Error(`Invalid "formUrl" in frontmatter for ${slug}`)
-  }
-  return url
-}
-
 const normalizeFrontmatter = (slug: string, frontmatter?: RawFrontmatter): JobFrontmatter => {
   if (!frontmatter) throw new Error(`Missing frontmatter export for job at ${slug}`)
   if (frontmatter.slug && frontmatter.slug !== slug) {
@@ -111,7 +97,6 @@ const normalizeFrontmatter = (slug: string, frontmatter?: RawFrontmatter): JobFr
     location: normalizeOptionalString(frontmatter.location, 'location', slug),
     employmentType: normalizeOptionalString(frontmatter.employmentType, 'employmentType', slug),
     workMode: normalizeWorkMode(frontmatter.workMode, slug),
-    formUrl: normalizeFormUrl(frontmatter.formUrl, slug),
   }
 }
 
@@ -138,3 +123,5 @@ jobs.forEach((job) => {
 })
 
 export const findJob = (slug: string) => jobs.find((job) => job.slug === slug)
+
+export const getJobApplicationPath = (slug: string) => `/apply?role=${encodeURIComponent(slug)}`

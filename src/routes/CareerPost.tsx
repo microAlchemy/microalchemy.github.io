@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MDXProvider } from '@mdx-js/react'
-import { findJob } from '../jobs/jobs'
+import { findJob, getJobApplicationPath } from '../jobs/jobs'
 import './blog.css'
 
 type LazyModule = { default: React.ComponentType }
@@ -93,7 +93,8 @@ const CareerPost: React.FC = () => {
     () => React.lazy(job.import as () => Promise<LazyModule>),
     [job],
   )
-  const { category, employmentType, formUrl, location, postedAt, summary, title, workMode } = job.frontmatter
+  const { category, employmentType, location, postedAt, summary, title, workMode } = job.frontmatter
+  const applicationPath = getJobApplicationPath(job.slug)
 
   return (
     <JobErrorBoundary>
@@ -113,9 +114,9 @@ const CareerPost: React.FC = () => {
               <p className="blog-lede">{summary}</p>
             </div>
             <div className="blog-nav">
-              <a href={formUrl} className="ghost-link" target="_blank" rel="noopener noreferrer">
+              <Link to={applicationPath} className="ghost-link">
                 Apply now
-              </a>
+              </Link>
               <Link to="/careers" className="ghost-link">
                 All roles
               </Link>
@@ -127,9 +128,9 @@ const CareerPost: React.FC = () => {
 
           <div className="job-apply-strip">
             <span>Ready to apply?</span>
-            <a href={formUrl} className="blog-cta-link" target="_blank" rel="noopener noreferrer">
-              Open application form
-            </a>
+            <Link to={applicationPath} className="blog-cta-link">
+              Apply on MicroAlchemy
+            </Link>
           </div>
 
           <React.Suspense fallback={<div className="blog-loading">Loading role...</div>}>

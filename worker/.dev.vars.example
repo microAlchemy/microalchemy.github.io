@@ -1,0 +1,5 @@
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+TWENTY_API_KEY=replace-with-a-restricted-twenty-api-key
+TWENTY_APPLICANT_WEBHOOK_URL=https://crm.microalchemy.xyz/webhooks/workflows/replace-workspace-id/replace-workflow-id
+TWENTY_CUSTOMER_WEBHOOK_URL=https://crm.microalchemy.xyz/webhooks/workflows/replace-workspace-id/replace-workflow-id
+TWENTY_INVESTOR_WEBHOOK_URL=https://crm.microalchemy.xyz/webhooks/workflows/replace-workspace-id/replace-workflow-id

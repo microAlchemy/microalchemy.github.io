@@ -6,6 +6,7 @@ import BlogIndex from './routes/BlogIndex'
 import BlogPost from './routes/BlogPost'
 import CareersIndex from './routes/CareersIndex'
 import CareerPost from './routes/CareerPost'
+import IntakePage from './routes/IntakePage'
 import './index.css'
 
 const RedirectRestorer = () => {
@@ -40,6 +41,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/careers" element={<CareersIndex />} />
         <Route path="/careers/:slug" element={<CareerPost />} />
+        <Route path="/apply" element={<IntakePage audience="applicant" />} />
+        <Route path="/build-with-us" element={<IntakePage audience="customer" />} />
+        <Route path="/invest-with-us" element={<IntakePage audience="investor" />} />
         <Route path="*" element={<App />} />
       </Routes>
     </BrowserRouter>

@@ -35,5 +35,11 @@ jobs:
         env:
           CI: true
 
+      - name: Type-check intake relay
+        run: npm run intake:check
+
+      - name: Build intake relay
+        run: npm run intake:build
+
       - name: Ensure tracked files are unchanged
         run: git diff --exit-code --stat

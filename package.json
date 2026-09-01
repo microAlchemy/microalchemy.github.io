@@ -5,7 +5,7 @@
   "main": "index.js",
   "homepage": "https://microalchemy.github.io",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,10 @@
     "preview": "vite preview",
     "lint:blog": "node scripts/check-blog-frontmatter.mjs",
     "rss": "node scripts/generate-rss.mjs",
+    "intake:check": "tsc -p worker/tsconfig.json",
+    "intake:build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler deploy --dry-run --config worker/wrangler.jsonc --outdir .wrangler/dry-run",
+    "intake:dev": "wrangler dev --config worker/wrangler.jsonc --var ALLOWED_ORIGINS:http://localhost:5173",
+    "intake:deploy": "wrangler deploy --config worker/wrangler.jsonc",
     "check": "npm run build && (git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git diff --exit-code --stat || echo \"Skipping git diff (repository not available)\")",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
@@ -27,6 +31,7 @@
     "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260901.1",
     "@mdx-js/rollup": "^3.0.1",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
@@ -37,6 +42,7 @@
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
     "typescript": "^5.2.2",
-    "vite": "^7.2.6"
+    "vite": "^7.2.6",
+    "wrangler": "^4.127.1"
   }
 }

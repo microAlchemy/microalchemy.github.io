@@ -424,28 +424,12 @@
   background: var(--color-gold-solid);
 }
 
-.contact {
-  font-size: 0.8rem;
-  margin: 2rem 0 0 0;
-  color: var(--color-white);
-  font-weight: 300;
-  letter-spacing: 0.5px;
-}
-
-.email-link {
-  color: var(--color-gold-solid);
-  text-decoration: none;
-  font-weight: normal;
-  transition: color 0.2s ease;
-}
-
-.email-link:hover {
-  color: var(--color-white);
-}
-
 .blog-cta {
   margin-top: 1.25rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .blog-cta-link {

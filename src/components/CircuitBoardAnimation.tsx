@@ -59,13 +59,14 @@ const investors: Card[] = [
   { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
   { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
   { name: 'Golden Ventures', url: 'https://www.golden.ventures/', logo: goldenLogo },
+  { name: 'Invest with us', url: '/invest-with-us', cta: true, logoType: 'text', logoText: 'Back the next silicon stack' },
 ]
 
 const partners: Card[] = [
   { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo },
   { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
   { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
-  { name: 'Partner with us', url: 'mailto:aditya@microalchemy.xyz', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
+  { name: 'Partner with us', url: '/build-with-us?interest=partnership', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
 ]
 
 const iconAlembic = <span aria-hidden>🝪</span>
@@ -75,7 +76,7 @@ const iconFoundry = <img src={iconFactory} alt="" aria-hidden className="product
 const products: Card[] = [
   {
     name: 'Alembic',
-    url: 'https://workshop.microalchemy.xyz/alembic',
+    url: '/build-with-us',
     description: 'High-level analog design language that brings software-speed iteration to silicon.',
     ctaText: 'Discover Alembic →',
     logoType: 'none',
@@ -83,7 +84,7 @@ const products: Card[] = [
   },
   {
     name: 'Workshop',
-    url: 'https://workshop.microalchemy.xyz',
+    url: '/build-with-us',
     description: 'Discover, remix, and share open source silicon designs in one place.',
     ctaText: 'Explore Workshop →',
     logoType: 'none',
@@ -91,7 +92,7 @@ const products: Card[] = [
   },
   {
     name: 'Foundry',
-    url: 'https://workshop.microalchemy.xyz/foundry',
+    url: '/build-with-us',
     description: 'Fast fabrication on a 1μm process with turnaround in under three weeks.',
     ctaText: 'Build with Foundry →',
     logoType: 'none',
@@ -229,14 +230,8 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
       const isExternal = item.url.startsWith('http')
       const cardClass = `card${cardClassName ? ` ${cardClassName}` : ''}${item.cta ? ' card-cta' : ''}${item.logoType === 'none' ? ' card-icon-only' : ''}`
 
-      return (
-        <a
-          key={item.name}
-          className={cardClass}
-          href={item.url}
-          target={isExternal ? '_blank' : undefined}
-          rel={isExternal ? 'noopener noreferrer' : undefined}
-        >
+      const contents = (
+        <>
           {item.logoType !== 'none' && (
             <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
               {item.logoType === 'image' || (!item.logoType && item.logo)
@@ -253,6 +248,20 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
           {item.description && <p className="product-desc">{item.description}</p>}
           {item.ctaText && <span className="blog-cta-link product-cta">{item.ctaText}</span>}
           {item.cta && !item.ctaText && <span className="card-cta-text">Reach out to collaborate</span>}
+        </>
+      )
+
+      return item.url.startsWith('/') ? (
+        <Link key={item.name} className={cardClass} to={item.url}>{contents}</Link>
+      ) : (
+        <a
+          key={item.name}
+          className={cardClass}
+          href={item.url}
+          target={isExternal ? '_blank' : undefined}
+          rel={isExternal ? 'noopener noreferrer' : undefined}
+        >
+          {contents}
         </a>
       )
     })}
@@ -292,6 +301,7 @@ const CircuitBoardAnimation: React.FC = () => {
                 <li>Open source design tooling with the same stack we fab.</li>
               </ul>
               <div className="blog-cta">
+                <Link to="/build-with-us" className="blog-cta-link">Build with us →</Link>
                 <Link to="/blog" className="blog-cta-link">Check out our blog →</Link>
               </div>
             </motion.div>
@@ -354,9 +364,6 @@ const CircuitBoardAnimation: React.FC = () => {
 
             <motion.p className="footer" {...fadeIn(4)}>
               Stay tuned for more updates and exciting developments.
-            </motion.p>
-            <motion.p className="contact" {...fadeIn(4.2)}>
-              Email inquiries to <a href="mailto:aditya@microalchemy.xyz" className="email-link">aditya@microalchemy.xyz</a>
             </motion.p>
           </div>
         </motion.div>
