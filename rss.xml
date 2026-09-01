@@ -14,7 +14,7 @@
       <author>MicroAlchemy Team</author>
       <category>funding</category><category>company</category><category>investors</category><category>news</category>
       <description>MicroAlchemy raises a $1.8M seed round from Golden Ventures</description>
-      <content:encoded><![CDATA[<h1>MicroAlchemy Announces $1.8M Seed Round</h1>
+      <content:encoded><![CDATA[<link rel="preload" as="image" href="/investors/golden.svg"/><h1>MicroAlchemy Announces $1.8M Seed Round</h1>
 <p>MicroAlchemy has raised a <strong>$1.8 million seed round</strong> from <a href="https://www.golden.ventures/"><strong>Golden Ventures</strong></a>.</p>
 <p>This funding will help MicroAlchemy accelerate our silicon prototyping roadmap, expand the team, and bring customers onto the platform faster.</p>
 <div class="cards-grid"><a href="https://www.golden.ventures/" target="_blank" rel="noopener noreferrer" class="card"><div class="card-logo has-image"><img src="/investors/golden.svg" alt="Golden Ventures logo"/></div></a></div>
@@ -60,7 +60,7 @@ our pipeline, email aditya@microalchemy.xyz</p></div></div>]]></content:encoded>
       <author>Microalchemy Team</author>
       <category>funding</category><category>company</category><category>investors</category><category>news</category>
       <description>MicroAlchemy raises a $2.16M pre-seed round led by Caffeinated Capital and Haystack VC</description>
-      <content:encoded><![CDATA[<h1>MicroAlchemy Announces $2.16M Pre-Seed Round</h1>
+      <content:encoded><![CDATA[<link rel="preload" as="image" href="/investors/caffeinated.svg"/><link rel="preload" as="image" href="/investors/haystack.png"/><h1>MicroAlchemy Announces $2.16M Pre-Seed Round</h1>
 <p>MicroAlchemy has raised a <strong>$2.16 million pre-seed round</strong> from <a href="https://www.caffeinated.com/"><strong>Caffeinated Capital</strong></a> and <a href="https://haystack.vc/"><strong>Haystack</strong></a>.</p>
 <p>With this MicroAlchemy will be building a proof of concept foundry and building out our EDA toolchain.</p>
 <div class="cards-grid"><a href="https://www.caffeinated.com/" target="_blank" rel="noopener noreferrer" class="card"><div class="card-logo has-image"><img src="/investors/caffeinated.svg" alt="Caffeinated Capital logo"/></div></a><a href="https://haystack.vc/" target="_blank" rel="noopener noreferrer" class="card"><div class="card-logo has-image"><img src="/investors/haystack.png" alt="Haystack logo"/></div></a></div>
