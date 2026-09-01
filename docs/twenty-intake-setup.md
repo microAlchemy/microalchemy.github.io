@@ -14,7 +14,7 @@ Each webhook receives flat JSON fields that are easy to select in Twenty's varia
 - routing: `audience`, `crmObject`, `status`
 - notification: `notificationSubject`, `notificationBody`
 
-Applicant payloads additionally contain `role`, `roleTitle`, `educationLevel`, `degreeFields`, `experienceAreas`, `edaExperience`, `labAccess`, `onsiteAvailability`, `startDate`, `resumeName`, and `resume`. The `resume` value is a Twenty-native file array produced by the relay after uploading the file through Twenty's metadata API.
+Applicant payloads additionally contain `role`, `roleTitle`, `educationLevel`, `degreeFields`, `experienceAreas`, `edaExperience`, `labAccess`, `onsiteAvailability`, `startDate`, `resumeName`, and `resume`. The `resume` value is a Twenty-native `[{ fileId, label }]` array produced by the relay after uploading the file through Twenty's metadata API. Accepted résumé formats are PDF, DOC, DOCX, PNG, JPEG, and WebP, up to 10 MB.
 
 Customer payloads additionally contain `interestAreas`, `projectStage`, `timeline`, and optional `details`.
 

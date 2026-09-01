@@ -12,11 +12,8 @@ interface Env {
 type Audience = 'applicant' | 'customer' | 'investor'
 
 type TwentyFileValue = {
-  id: string
-  name: string
-  size: number
-  type: string
-  createdAt: string
+  fileId: string
+  label: string
 }
 
 type IntakePayload = Record<string, unknown> & {
@@ -28,11 +25,14 @@ type IntakePayload = Record<string, unknown> & {
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024
 const MAX_RESUME_BYTES = 10 * 1024 * 1024
-const allowedResumeExtensions = new Set(['pdf', 'doc', 'docx'])
+const allowedResumeExtensions = new Set(['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'webp'])
 const allowedResumeMimeTypes = new Set([
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
   'application/octet-stream',
   '',
 ])
@@ -268,7 +268,7 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
   const name = safeFileName(file.name)
   const extension = name.split('.').pop()?.toLowerCase() ?? ''
   if (!allowedResumeExtensions.has(extension) || !allowedResumeMimeTypes.has(file.type)) {
-    throw new IntakeError('Upload your résumé as a PDF, DOC, or DOCX file.')
+    throw new IntakeError('Upload your résumé as a PDF, DOC, DOCX, PNG, JPEG, or WebP file.')
   }
 
   const apiUrl = new URL(env.TWENTY_API_URL)
@@ -282,8 +282,6 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
         fieldMetadataUniversalIdentifier: $fieldMetadataUniversalIdentifier
       ) {
         id
-        size
-        createdAt
       }
     }`,
     variables: {
@@ -302,7 +300,7 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
     body: uploadBody,
   })
   const result = await response.json() as {
-    data?: { uploadFilesFieldFileByUniversalIdentifier?: { id: string, size: number, createdAt: string } }
+    data?: { uploadFilesFieldFileByUniversalIdentifier?: { id: string } }
     errors?: Array<{ message?: string }>
   }
   const uploaded = result.data?.uploadFilesFieldFileByUniversalIdentifier
@@ -312,11 +310,8 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
   }
 
   const resume: TwentyFileValue = {
-    id: uploaded.id,
-    name,
-    size: uploaded.size,
-    type: file.type || 'application/octet-stream',
-    createdAt: uploaded.createdAt,
+    fileId: uploaded.id,
+    label: name,
   }
   payload.resumeName = name
   payload.resume = [resume]

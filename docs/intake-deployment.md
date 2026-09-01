@@ -66,7 +66,7 @@ npm run intake:dev
 - The Worker accepts only configured website origins.
 - Every real submission requires server-validated Turnstile proof.
 - A honeypot quietly discards simple bot submissions.
-- Résumés are limited to PDF, DOC, and DOCX files of at most 10 MB.
+- Résumés are limited to PDF, DOC, DOCX, PNG, JPEG, and WebP files of at most 10 MB.
 - Résumés are uploaded through Twenty's metadata API and attached to the native `Résumé` file field on the Application record.
 - Twenty stores those files in its existing private Google Cloud Storage configuration; no Cloudflare R2 subscription or bucket is required.
 - Webhook URLs and all other secrets are Worker secrets, not GitHub Pages variables.

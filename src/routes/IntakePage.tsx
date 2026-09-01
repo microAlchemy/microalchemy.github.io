@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
+import type { MutableRefObject } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { jobs } from '../jobs/jobs'
 import './intake.css'
@@ -97,9 +98,16 @@ const CheckboxGroup = ({ name, options }: { name: string; options: string[] }) =
   </div>
 )
 
-const TurnstileWidget = ({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) => {
+const TurnstileWidget = ({
+  siteKey,
+  onToken,
+  widgetIdRef,
+}: {
+  siteKey: string
+  onToken: (token: string) => void
+  widgetIdRef: MutableRefObject<string | undefined>
+}) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const widgetIdRef = useRef<string>()
 
   useEffect(() => {
     if (!siteKey) return undefined
@@ -138,7 +146,7 @@ const TurnstileWidget = ({ siteKey, onToken }: { siteKey: string; onToken: (toke
       if (widgetIdRef.current && window.turnstile) window.turnstile.remove(widgetIdRef.current)
       widgetIdRef.current = undefined
     }
-  }, [onToken, siteKey])
+  }, [onToken, siteKey, widgetIdRef])
 
   return <div ref={containerRef} className="intake-turnstile" aria-label="Security verification" />
 }
@@ -239,8 +247,13 @@ const ApplicantFields = ({ role, setRole }: { role: string; setRole: (value: str
 
       <label className="intake-field">
         <span>Résumé <b>*</b></span>
-        <span className="intake-field-help">PDF, DOC, or DOCX up to 10 MB.</span>
-        <input name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+        <span className="intake-field-help">PDF, DOC, DOCX, PNG, JPEG, or WebP up to 10 MB.</span>
+        <input
+          name="resume"
+          type="file"
+          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg,image/webp"
+          required
+        />
       </label>
 
       <label className="intake-field">
@@ -356,6 +369,7 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
   const [statusMessage, setStatusMessage] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const startedAtRef = useRef(Date.now())
+  const turnstileWidgetIdRef = useRef<string>()
   const applicantFollowUpRef = useRef<HTMLElement>(null)
   const bookingRef = useRef<HTMLElement>(null)
 
@@ -424,9 +438,11 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
       setSubmissionState('success')
       setStatusMessage('Received. Kunal and Aditya have been notified, and your submission is now in our CRM.')
       setTurnstileToken('')
-      window.turnstile?.reset()
+      window.turnstile?.reset(turnstileWidgetIdRef.current)
       startedAtRef.current = Date.now()
     } catch (error) {
+      setTurnstileToken('')
+      window.turnstile?.reset(turnstileWidgetIdRef.current)
       setSubmissionState('error')
       setStatusMessage(error instanceof Error ? error.message : 'We could not send your submission. Please try again.')
     }
@@ -466,7 +482,11 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
             </label>
 
             {turnstileSiteKey ? (
-              <TurnstileWidget siteKey={turnstileSiteKey} onToken={setTurnstileToken} />
+              <TurnstileWidget
+                siteKey={turnstileSiteKey}
+                onToken={setTurnstileToken}
+                widgetIdRef={turnstileWidgetIdRef}
+              />
             ) : (
               <p className="intake-config-warning">Security verification is not configured yet. Submissions remain disabled until the production key is added.</p>
             )}
