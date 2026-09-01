@@ -30,9 +30,9 @@ npm run intake:build
 
 ## CI and testing
 
-- Requires Node 20+ (see `.nvmrc`).
+- Requires Node 24+ (see `.nvmrc`).
 - `npm run check` mirrors CI by building (with frontmatter lint + RSS) and asserting tracked files stay clean.
-- Docker parity: `docker build -f docker/ci.Dockerfile .` runs lint + build in a Node 20 container.
+- Docker parity: `docker build -f docker/ci.Dockerfile .` runs lint + build in a Node 24 container.
 
 ## Content updates
 

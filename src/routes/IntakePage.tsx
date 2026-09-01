@@ -369,7 +369,7 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
   const [statusMessage, setStatusMessage] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const startedAtRef = useRef(Date.now())
-  const turnstileWidgetIdRef = useRef<string>()
+  const turnstileWidgetIdRef = useRef<string | undefined>(undefined)
   const applicantFollowUpRef = useRef<HTMLElement>(null)
   const bookingRef = useRef<HTMLElement>(null)
 
