@@ -1,9 +1,9 @@
 {
   "name": "microalchemy-site",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "MicroAlchemy marketing site and MDX blog",
   "main": "index.js",
-  "homepage": "https://microalchemy.github.io",
+  "homepage": "https://microalchemy.xyz",
   "engines": {
     "node": ">=24"
   },
