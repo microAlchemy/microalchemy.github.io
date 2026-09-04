@@ -373,7 +373,7 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
   const applicantFollowUpRef = useRef<HTMLElement>(null)
   const bookingRef = useRef<HTMLElement>(null)
 
-  const endpoint = import.meta.env.VITE_INTAKE_API_URL || 'https://intake.microalchemy.xyz/submit'
+  const endpoint = import.meta.env.VITE_INTAKE_API_URL || 'https://microalchemy-intake.kunal-chandan.workers.dev/submit'
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? '1x00000000000000000000AA' : '')
   const copy = audienceCopy[audience]
 
