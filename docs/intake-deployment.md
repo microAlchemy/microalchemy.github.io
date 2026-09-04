@@ -33,7 +33,7 @@ npx wrangler secret put TWENTY_CUSTOMER_WEBHOOK_URL --config worker/wrangler.jso
 npx wrangler secret put TWENTY_INVESTOR_WEBHOOK_URL --config worker/wrangler.jsonc
 ```
 
-`TWENTY_API_KEY` should use a dedicated Twenty role limited to file uploads. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
+`TWENTY_API_KEY` should use a dedicated, least-privilege Twenty role that can upload the Applications `Résumé` file and invoke the three authenticated intake workflows. The Worker sends this key to Twenty as a bearer token; it is never included in the GitHub Pages bundle. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
 
 Deploy the Worker:
 
@@ -70,4 +70,5 @@ npm run intake:dev
 - Résumés are uploaded through Twenty's metadata API and attached to the native `Résumé` file field on the Application record.
 - Twenty stores those files in its existing private Google Cloud Storage configuration; no Cloudflare R2 subscription or bucket is required.
 - Webhook URLs and all other secrets are Worker secrets, not GitHub Pages variables.
+- The Worker authenticates each relay request to Twenty with the private `TWENTY_API_KEY`; the static site never receives that credential.
 - The Google booking page loads only after a customer or investor submission succeeds, so the CRM intake is recorded before scheduling.

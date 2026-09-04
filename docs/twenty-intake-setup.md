@@ -45,7 +45,7 @@ Create a custom **Applicants** object with these fields:
 
 Workflow actions:
 
-1. Webhook trigger named **Website — Applicant intake**. Define its expected body with an applicant test payload from the Worker.
+1. Webhook trigger named **Website — Applicant intake**. Define its expected body with an applicant test payload from the Worker and set authentication to **API key**.
 2. **Upsert Record → People**, matching on `email`; map name, email, phone, and website.
 3. **Create Record → Applicants**; relate it to the Person returned by step 2, map the applicant fields above, and set `Résumé` from the webhook's `resume` array.
 4. **Send Email → kunal@microalchemy.xyz** with the notification subject/body and the Applicant record link.
@@ -57,7 +57,7 @@ Add these custom fields to **Opportunities**: Submission ID (unique text), Inter
 
 Workflow actions:
 
-1. Webhook trigger named **Website — Customer interest**.
+1. Webhook trigger named **Website — Customer interest** with authentication set to **API key**.
 2. **Upsert Record → People**, matching on `email`.
 3. **Upsert Record → Companies**, matching on `emailDomain` when it is a company domain; map `organization` as the company name.
 4. **Create Record → Opportunities** named `organization — interestAreas`, set stage to the first/new stage, relate the Company and contact Person, and map the customer fields.
@@ -71,7 +71,7 @@ Create a custom **Investor Interests** object with these fields: Name, Submissio
 
 Workflow actions:
 
-1. Webhook trigger named **Website — Investor interest**.
+1. Webhook trigger named **Website — Investor interest** with authentication set to **API key**.
 2. Upsert the Person by email.
 3. Upsert the Company by domain when appropriate.
 4. Create the Investor Interest record and relate the Person and Company from the earlier steps.

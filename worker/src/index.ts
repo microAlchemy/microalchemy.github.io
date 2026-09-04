@@ -335,14 +335,17 @@ const submitIntake = async (request: Request, env: Env, origin: string) => {
   if (audience === 'applicant') await uploadResumeToTwenty(form, payload, env)
 
   const webhookUrl = webhookForAudience(audience, env)
-  if (!webhookUrl) {
+  if (!webhookUrl || !env.TWENTY_API_KEY) {
     throw new IntakeError('The CRM destination is not configured.', 503)
   }
 
   try {
     const response = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.TWENTY_API_KEY}`,
+      },
       body: JSON.stringify(payload),
     })
     if (!response.ok) throw new Error(`Twenty returned ${response.status}`)
