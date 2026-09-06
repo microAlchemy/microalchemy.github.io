@@ -378,6 +378,10 @@
   background: transparent;
 }
 
+.card-logo.card-logo-wide {
+  width: 180px;
+}
+
 .card-logo img {
   max-width: 100%;
   max-height: 100%;

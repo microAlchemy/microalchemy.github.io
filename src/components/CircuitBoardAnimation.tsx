@@ -29,6 +29,7 @@ type Card = {
   description?: string
   ctaText?: string
   status?: 'Pre-release'
+  wideLogo?: boolean
 }
 
 type TeamMember = {
@@ -63,7 +64,7 @@ const investors: Card[] = [
 const partners: Card[] = [
   { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo.src },
   { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo.src },
-  { name: 'University of Waterloo', url: 'https://uwaterloo.ca/', logo: uwaterlooLogo.src },
+  { name: 'University of Waterloo', url: 'https://uwaterloo.ca/', logo: uwaterlooLogo.src, wideLogo: true },
   { name: 'Partner with us', url: '/build-with-us/?interest=partnership', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
 ]
 
@@ -240,7 +241,7 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
       const contents = (
         <>
           {item.logoType !== 'none' && (
-            <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
+            <div className={`card-logo${item.logo ? ' has-image' : ''}${item.wideLogo ? ' card-logo-wide' : ''}`}>
               {item.logoType === 'image' || (!item.logoType && item.logo)
                 ? item.logo
                   ? <img src={item.logo} alt={`${item.name} logo`} loading="lazy" decoding="async" />
