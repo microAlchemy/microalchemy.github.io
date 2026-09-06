@@ -1,6 +1,6 @@
 # Intake form deployment
 
-The website remains a static Vite application on GitHub Pages. Form submissions go through the `microalchemy-intake` Cloudflare Worker so the Twenty API credential, CRM webhook URLs, and anti-spam secret never reach browser JavaScript.
+The website remains a static Astro site on GitHub Pages. Form submissions go through the `microalchemy-intake` Cloudflare Worker so the Twenty API credential, CRM webhook URLs, and anti-spam secret never reach browser JavaScript.
 
 Each audience has a dedicated page: `/apply`, `/build-with-us`, and `/invest-with-us`.
 
@@ -47,10 +47,10 @@ Either attach `intake.microalchemy.xyz` as a Worker custom domain or keep the ge
 
 Set these GitHub repository variables under **Settings → Secrets and variables → Actions → Variables**:
 
-- `VITE_INTAKE_API_URL`: the Worker URL ending in `/submit`
-- `VITE_TURNSTILE_SITE_KEY`: the public Turnstile site key
+- `PUBLIC_INTAKE_API_URL`: the Worker URL ending in `/submit`
+- `PUBLIC_TURNSTILE_SITE_KEY`: the public Turnstile site key
 
-The GitHub Pages workflow passes both values into the Vite build. Never put the Turnstile secret, Twenty API key, or Twenty webhook URLs into a `VITE_` variable; Vite values are public.
+The GitHub Pages workflow passes both values into the Astro build. Never put the Turnstile secret, Twenty API key, or Twenty webhook URLs into a `PUBLIC_` variable; those values are included in browser JavaScript.
 
 For local development, copy `.env.example` to `.env.local`, copy `worker/.dev.vars.example` to `worker/.dev.vars`, and replace the placeholder webhook URLs. Cloudflare's documented test keys are intentionally used in the example files and must not be used in production.
 

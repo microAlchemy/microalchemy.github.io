@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import '../routes/blog.css'
+---
+
+<BaseLayout
+  title="Page Not Found | MicroAlchemy"
+  description="The requested page could not be found."
+  canonicalPath="/404/"
+  noindex
+>
+  <main class="blog-shell">
+    <div class="blog-container">
+      <section class="blog-not-found" aria-labelledby="not-found-title">
+        <div class="blog-eyebrow">404</div>
+        <h1 id="not-found-title">Page not found</h1>
+        <p>The address may be incorrect, or the page may have moved.</p>
+        <nav class="blog-nav" aria-label="Page not found navigation">
+          <a href="/" class="ghost-link">Home</a>
+          <a href="/blog/" class="ghost-link">Blog</a>
+          <a href="/careers/" class="ghost-link">Careers</a>
+        </nav>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

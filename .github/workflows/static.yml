@@ -36,12 +36,12 @@ jobs:
         run: npm ci
 
       # 4. Run the build command
-      # This executes "tsc && vite build" which creates the production assets in the 'dist' directory.
+      # Astro generates one static HTML document per route in the dist directory.
       - name: Build project
         run: npm run build
         env:
-          VITE_INTAKE_API_URL: ${{ vars.VITE_INTAKE_API_URL }}
-          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
+          PUBLIC_INTAKE_API_URL: ${{ vars.PUBLIC_INTAKE_API_URL || vars.VITE_INTAKE_API_URL }}
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY || vars.VITE_TURNSTILE_SITE_KEY }}
 
       # 5. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages

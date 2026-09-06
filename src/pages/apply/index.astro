@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content'
+import IntakePage from '../../routes/IntakePage'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getSlug } from '../../lib/site'
+
+const jobOptions = (await getCollection('jobs'))
+  .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime())
+  .map((job) => ({ slug: getSlug(job.id), title: job.data.title }))
+---
+
+<BaseLayout
+  title="Apply to MicroAlchemy"
+  description="Apply for an open semiconductor, hardware, or EDA engineering role at MicroAlchemy."
+  canonicalPath="/apply/"
+  noindex
+>
+  <IntakePage audience="applicant" jobOptions={jobOptions} client:load />
+</BaseLayout>

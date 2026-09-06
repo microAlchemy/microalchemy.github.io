@@ -1,0 +1,101 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { getCollection, render } from 'astro:content'
+import { marked } from 'marked'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { employmentTypeLabels, formatDate, getSlug, ORGANIZATION_ID, SITE_URL } from '../../lib/site'
+import '../../routes/blog.css'
+
+export const getStaticPaths = (async () => {
+  const jobs = await getCollection('jobs')
+  return jobs.map((job) => ({
+    params: { slug: getSlug(job.id) },
+    props: { job },
+  }))
+}) satisfies GetStaticPaths
+
+const { job } = Astro.props
+const { Content } = await render(job)
+const slug = getSlug(job.id)
+const canonicalPath = `/careers/${slug}/`
+const applicationPath = `/apply/?role=${encodeURIComponent(slug)}`
+const descriptionHtml = job.rendered?.html ?? marked.parse(job.body ?? '')
+const jobLocation = job.data.addressLocality && job.data.addressCountry
+  ? {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: job.data.addressLocality,
+        ...(job.data.addressRegion ? { addressRegion: job.data.addressRegion } : {}),
+        addressCountry: job.data.addressCountry,
+      },
+    }
+  : undefined
+
+const jobJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'JobPosting',
+  '@id': `${SITE_URL}${canonicalPath}#job`,
+  title: job.data.title,
+  description: descriptionHtml,
+  datePosted: job.data.postedAt.toISOString().slice(0, 10),
+  ...(job.data.validThrough ? { validThrough: job.data.validThrough.toISOString() } : {}),
+  employmentType: job.data.employmentType,
+  identifier: {
+    '@type': 'PropertyValue',
+    name: 'MicroAlchemy',
+    value: slug,
+  },
+  hiringOrganization: {
+    '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
+    name: 'MicroAlchemy',
+    sameAs: `${SITE_URL}/`,
+    logo: `${SITE_URL}/favicon.svg`,
+  },
+  ...(jobLocation ? { jobLocation } : {}),
+  directApply: true,
+  industry: 'Semiconductor manufacturing',
+  url: `${SITE_URL}${canonicalPath}`,
+}
+---
+
+<BaseLayout
+  title={`${job.data.title} | Careers at MicroAlchemy`}
+  description={job.data.summary}
+  canonicalPath={canonicalPath}
+  structuredData={jobJsonLd}
+>
+  <main class="blog-shell">
+    <div class="blog-container">
+      <header class="blog-header blog-post-header">
+        <div>
+          <div class="blog-eyebrow">MicroAlchemy careers</div>
+          <h1 class="blog-title">{job.data.title}</h1>
+          <div class="blog-meta">
+            <span class="blog-tag">{job.data.category}</span>
+            {job.data.workMode && <span class="blog-tag">{job.data.workMode}</span>}
+            {job.data.location && <span class="blog-tag">{job.data.location}</span>}
+            <span class="blog-tag">{employmentTypeLabels[job.data.employmentType]}</span>
+            <time datetime={job.data.postedAt.toISOString()}>Posted {formatDate(job.data.postedAt, true)}</time>
+          </div>
+          <p class="blog-lede">{job.data.summary}</p>
+        </div>
+        <nav class="blog-nav" aria-label="Job navigation">
+          <a href={applicationPath} class="ghost-link">Apply now</a>
+          <a href="/careers/" class="ghost-link">All roles</a>
+          <a href="/" class="ghost-link">Home</a>
+        </nav>
+      </header>
+
+      <div class="job-apply-strip">
+        <span>Ready to apply?</span>
+        <a href={applicationPath} class="blog-cta-link">Apply on MicroAlchemy</a>
+      </div>
+
+      <article class="blog-article">
+        <Content />
+      </article>
+    </div>
+  </main>
+</BaseLayout>

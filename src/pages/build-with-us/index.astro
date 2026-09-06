@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content'
+import IntakePage from '../../routes/IntakePage'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getSlug } from '../../lib/site'
+
+const jobOptions = (await getCollection('jobs')).map((job) => ({ slug: getSlug(job.id), title: job.data.title }))
+---
+
+<BaseLayout
+  title="Build With MicroAlchemy"
+  description="Tell MicroAlchemy about the silicon design, fabrication, or technical partnership you are exploring."
+  canonicalPath="/build-with-us/"
+  noindex
+>
+  <IntakePage audience="customer" jobOptions={jobOptions} client:load />
+</BaseLayout>

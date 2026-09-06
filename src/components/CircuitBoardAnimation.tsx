@@ -1,19 +1,16 @@
-import React, { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { motion, type MotionProps } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
 import uaLogo from '../img/ua-logo.svg'
 import caffeinatedLogo from '../img/investors/caffeinated.svg'
-import haystackLogo from '../img/investors/haystack.png'
+import haystackLogo from '../img/optimized/haystack.webp'
 import goldenLogo from '../img/investors/golden.svg'
-import gtechLogo from '../img/partners/gtech.png'
-import iisenseLogo from '../img/partners/iisense.png'
-import uwaterlooLogo from '../img/partners/uwaterloo.png'
-import adityaPhoto from '../img/team/aditya.jpg'
-import kunalPhoto from '../img/team/kunal.jpg'
-import saifPhoto from '../img/team/saif.jpg'
+import gtechLogo from '../img/optimized/gtech.webp'
+import iisenseLogo from '../img/optimized/iisense.webp'
+import uwaterlooLogo from '../img/optimized/uwaterloo.webp'
+import adityaPhoto from '../img/optimized/aditya.webp'
+import kunalPhoto from '../img/optimized/kunal.webp'
+import saifPhoto from '../img/optimized/saif.webp'
 import iconStore from '@tabler/icons/outline/building-store.svg'
 import iconFactory from '@tabler/icons/outline/building-factory-2.svg'
-import { posts } from '../blog/posts'
 import {
   generateCircuitScene,
   getCircuitAnimationEndMs,
@@ -31,6 +28,7 @@ type Card = {
   icon?: React.ReactNode
   description?: string
   ctaText?: string
+  status?: 'Pre-release'
 }
 
 type TeamMember = {
@@ -56,65 +54,58 @@ type Palette = {
 const RESIZE_DEBOUNCE_MS = 120
 
 const investors: Card[] = [
-  { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo },
-  { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo },
-  { name: 'Golden Ventures', url: 'https://www.golden.ventures/', logo: goldenLogo },
-  { name: 'Invest with us', url: '/invest-with-us', cta: true, logoType: 'text', logoText: 'Back the next silicon stack' },
+  { name: 'Caffeinated Capital', url: 'https://www.caffeinated.com/', logo: caffeinatedLogo.src },
+  { name: 'Haystack Ventures', url: 'https://haystack.vc/', logo: haystackLogo.src },
+  { name: 'Golden Ventures', url: 'https://www.golden.ventures/', logo: goldenLogo.src },
+  { name: 'Invest with us', url: '/invest-with-us/', cta: true, logoType: 'text', logoText: 'Back the next silicon stack' },
 ]
 
 const partners: Card[] = [
-  { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo },
-  { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo },
-  { name: 'G2N @ University of Waterloo', url: 'https://g2n.uwaterloo.ca/', logo: uwaterlooLogo },
-  { name: 'Partner with us', url: '/build-with-us?interest=partnership', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
+  { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo.src },
+  { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo.src },
+  { name: 'University of Waterloo', url: 'https://uwaterloo.ca/', logo: uwaterlooLogo.src },
+  { name: 'Partner with us', url: '/build-with-us/?interest=partnership', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
 ]
 
 const iconAlembic = <span aria-hidden>🝪</span>
-const iconWorkshop = <img src={iconStore} alt="" aria-hidden className="product-icon-img" />
-const iconFoundry = <img src={iconFactory} alt="" aria-hidden className="product-icon-img" />
+const iconWorkshop = <img src={iconStore.src} alt="" aria-hidden width="24" height="24" className="product-icon-img" />
+const iconFoundry = <img src={iconFactory.src} alt="" aria-hidden width="24" height="24" className="product-icon-img" />
 
 const products: Card[] = [
   {
     name: 'Alembic',
-    url: '/build-with-us',
+    url: '/build-with-us/',
     description: 'High-level analog design language that brings software-speed iteration to silicon.',
     ctaText: 'Discover Alembic →',
+    status: 'Pre-release',
     logoType: 'none',
     icon: iconAlembic,
   },
   {
     name: 'Workshop',
-    url: '/build-with-us',
+    url: '/build-with-us/',
     description: 'Discover, remix, and share open source silicon designs in one place.',
     ctaText: 'Explore Workshop →',
+    status: 'Pre-release',
     logoType: 'none',
     icon: iconWorkshop,
   },
   {
     name: 'Foundry',
-    url: '/build-with-us',
+    url: '/build-with-us/',
     description: 'Fast fabrication on a 1μm process with turnaround in under three weeks.',
     ctaText: 'Build with Foundry →',
+    status: 'Pre-release',
     logoType: 'none',
     icon: iconFoundry,
   },
 ]
 
 const team: TeamMember[] = [
-  { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto, url: 'https://www.linkedin.com/in/srini-aditya/' },
-  { name: 'Kunal Chandan', title: 'Chief Technical Officer', photo: kunalPhoto, url: 'https://www.linkedin.com/in/kunal-chandan/' },
-  { name: 'Saif Khattak', title: 'Director of Software', photo: saifPhoto, url: 'https://www.linkedin.com/in/skhattak00/' },
+  { name: 'Aditya Srinivasan', title: 'Chief Executive Officer', photo: adityaPhoto.src, url: 'https://www.linkedin.com/in/srini-aditya/' },
+  { name: 'Kunal Chandan', title: 'Chief Technical Officer', photo: kunalPhoto.src, url: 'https://www.linkedin.com/in/kunal-chandan/' },
+  { name: 'Saif Khattak', title: 'Director of Software', photo: saifPhoto.src, url: 'https://www.linkedin.com/in/skhattak00/' },
 ]
-
-const newsPosts: NewsEntry[] = posts
-  .filter((post) => post.frontmatter.tags.some((tag) => tag.toLowerCase() === 'news'))
-  .slice(0, 3)
-  .map((post) => ({
-    slug: post.slug,
-    title: post.frontmatter.title,
-    date: post.frontmatter.date,
-    summary: post.frontmatter.summary,
-  }))
 
 const getCircuitPalette = (): Palette => {
   if (typeof window === 'undefined') {
@@ -143,6 +134,7 @@ const configureCanvas = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
 const useCircuitCanvas = (
   containerRef: React.RefObject<HTMLDivElement | null>,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  prefersReducedMotion: boolean,
 ) => {
   const animationFrameRef = useRef<number | null>(null)
   const resizeTimeoutRef = useRef<number | null>(null)
@@ -171,6 +163,12 @@ const useCircuitCanvas = (
       const scene = generateCircuitScene(width, height, getCircuitSeed(width, height))
       const palette = getCircuitPalette()
       const animationEndMs = getCircuitAnimationEndMs(scene)
+
+      if (prefersReducedMotion) {
+        renderCircuitFrame(ctx, scene, palette, animationEndMs)
+        return
+      }
+
       const startTime = performance.now()
 
       const drawFrame = (now: number) => {
@@ -195,33 +193,42 @@ const useCircuitCanvas = (
       cancelScheduledWork()
       window.removeEventListener('resize', handleResize)
     }
-  }, [canvasRef, containerRef])
+  }, [canvasRef, containerRef, prefersReducedMotion])
 }
 
-const fadeIn = (delay: number): MotionProps => ({
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: [0.25, 0.25, 0.25, 1] },
-})
+const usePrefersReducedMotion = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
 
-const reveal = (delay: number): MotionProps => ({
-  initial: { opacity: 0, scale: 0.95, y: 20 },
-  animate: { opacity: 1, scale: 1, y: 0 },
-  transition: { duration: 0.8, delay, ease: [0.25, 0.25, 0.25, 1] },
-})
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const updatePreference = () => setPrefersReducedMotion(media.matches)
+    updatePreference()
+    media.addEventListener('change', updatePreference)
+    return () => media.removeEventListener('change', updatePreference)
+  }, [])
+
+  return prefersReducedMotion
+}
 
 const formatDate = (value?: string) => {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString('en-CA', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 }
 
-const Section: React.FC<{ title: string; delay: number; className?: string; children: React.ReactNode }> = ({ title, delay, className = '', children }) => (
-  <motion.section className={className} {...fadeIn(delay)}>
+const Section: React.FC<{ title: string; className?: string; children: React.ReactNode }> = ({ title, className = '', children }) => (
+  <section className={className}>
     <h2 className="subtitle">{title}</h2>
     {children}
-  </motion.section>
+  </section>
 )
 
 const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: string }> = ({ items, className = '', cardClassName = '' }) => (
@@ -236,7 +243,7 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
             <div className={`card-logo${item.logo ? ' has-image' : ''}`}>
               {item.logoType === 'image' || (!item.logoType && item.logo)
                 ? item.logo
-                  ? <img src={item.logo} alt={`${item.name} logo`} />
+                  ? <img src={item.logo} alt={`${item.name} logo`} loading="lazy" decoding="async" />
                   : (item.logoText ?? 'Logo Placeholder')
                 : (item.logoText ?? (item.cta ? 'Get in touch' : 'Logo Placeholder'))}
             </div>
@@ -245,15 +252,14 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
             {item.icon && <span className="product-icon" aria-hidden>{item.icon}</span>}
             {item.name}
           </span>
+          {item.status && <span className="product-status">{item.status}</span>}
           {item.description && <p className="product-desc">{item.description}</p>}
           {item.ctaText && <span className="blog-cta-link product-cta">{item.ctaText}</span>}
           {item.cta && !item.ctaText && <span className="card-cta-text">Reach out to collaborate</span>}
         </>
       )
 
-      return item.url.startsWith('/') ? (
-        <Link key={item.name} className={cardClass} to={item.url}>{contents}</Link>
-      ) : (
+      return (
         <a
           key={item.name}
           className={cardClass}
@@ -268,107 +274,106 @@ const CardGrid: React.FC<{ items: Card[]; className?: string; cardClassName?: st
   </div>
 )
 
-const CircuitBoardAnimation: React.FC = () => {
+const CircuitBoardAnimation: React.FC<{ newsPosts: NewsEntry[] }> = ({ newsPosts }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
-  useCircuitCanvas(containerRef, canvasRef)
+  useCircuitCanvas(containerRef, canvasRef, prefersReducedMotion)
 
   return (
-    <div ref={containerRef} className="circuit-container">
-      <canvas ref={canvasRef} className="circuit-canvas" />
+    <main ref={containerRef} className="circuit-container">
+      <canvas ref={canvasRef} className="circuit-canvas" aria-hidden="true" />
       <div className="text-overlay">
-        <motion.div className="text-content" {...reveal(2.5)}>
+        <div className="text-content">
           <div className="text-content-inner">
-            <motion.div className="title-row" {...fadeIn(2)}>
-              <h1 className="title">Welcome to MicroAlchemy</h1>
+            <div className="title-row">
+              <h1 className="title">Rapid silicon prototyping</h1>
               <div className="title-logo" aria-hidden="true">
                 <div
                   className="title-logo-mark"
                   style={{
-                    WebkitMask: `url(${uaLogo}) center / contain no-repeat`,
-                    mask: `url(${uaLogo}) center / contain no-repeat`,
+                    WebkitMask: `url(${uaLogo.src}) center / contain no-repeat`,
+                    mask: `url(${uaLogo.src}) center / contain no-repeat`,
                   }}
                 />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div className="description" {...fadeIn(3.2)}>
+            <div className="description">
               <p>We are compressing silicon prototyping timelines.</p>
-              <p>Cutting fabrication lead times and breaking the silicon EDA duopoly.</p>
+              <p>Cutting fabrication lead times and building an open-source alternative to closed EDA stacks.</p>
               <ul className="description-list">
                 <li>Silicon wafers in under <strong>3 weeks</strong> on a <strong>1μm</strong> process.</li>
                 <li>Open source design tooling with the same stack we fab.</li>
               </ul>
               <div className="blog-cta">
-                <Link to="/build-with-us" className="blog-cta-link">Build with us →</Link>
-                <Link to="/blog" className="blog-cta-link">Check out our blog →</Link>
+                <a href="/build-with-us/" className="blog-cta-link">Build with us →</a>
+                <a href="/blog/" className="blog-cta-link">Check out our blog →</a>
               </div>
-            </motion.div>
+            </div>
 
-            <Section title="Our Products" delay={3.4} className="expertise">
+            <Section title="Our Products" className="expertise">
               <CardGrid className="product-grid" cardClassName="product" items={products} />
             </Section>
 
-            <Section title="The Team" delay={3.6} className="team-section">
+            <Section title="The Team" className="team-section">
               <div className="team-grid">
                 {team.map((member) => (
-                  <motion.a
+                  <a
                     key={member.name}
                     className="card team-card"
                     href={member.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
                   >
                     <div className={`card-logo team-photo${member.photo ? ' has-image' : ''}`} aria-label={`${member.name} LinkedIn profile`}>
-                      {member.photo ? <img src={member.photo} alt={`${member.name} portrait`} /> : 'Photo Placeholder'}
+                      {member.photo ? <img src={member.photo} alt={`${member.name} portrait`} width="120" height="120" loading="lazy" decoding="async" /> : 'Photo Placeholder'}
                     </div>
                     <h3 className="team-name">{member.name}</h3>
                     <p className="team-title">{member.title}</p>
-                  </motion.a>
+                  </a>
                 ))}
-                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                  <Link to="/careers" className="card team-card team-card-cta">
+                <div>
+                  <a href="/careers/" className="card team-card team-card-cta">
                     <div className="card-logo team-photo team-photo-cta" aria-hidden="true">
                       Your Face Here
                     </div>
                     <h3 className="team-name">Join the team</h3>
                     <p className="team-title">See open roles and apply</p>
-                  </Link>
-                </motion.div>
+                  </a>
+                </div>
               </div>
             </Section>
 
-            <Section title="Investors" delay={3.7} className="partners-section investors-section">
+            <Section title="Investors" className="partners-section investors-section">
               <CardGrid items={investors} />
             </Section>
 
-            <Section title="Technical Partners" delay={3.8} className="partners-section">
+            <Section title="Technical Partners" className="partners-section">
               <CardGrid items={partners} />
             </Section>
 
-            <Section title="News" delay={3.9} className="partners-section">
+            <Section title="News" className="partners-section">
               <div className="cards-grid product-grid news-grid">
                 {newsPosts.map((post) => (
-                  <Link key={post.slug} to={`/blog/${post.slug}`} className="card product news-card">
+                  <a key={post.slug} href={`/blog/${post.slug}/`} className="card product news-card">
                     <span className="news-date">{formatDate(post.date) || post.date}</span>
                     <span className="card-name">{post.title}</span>
                     <p className="product-desc">{post.summary}</p>
                     <span className="blog-cta-link product-cta">Read article →</span>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </Section>
 
-            <motion.p className="footer" {...fadeIn(4)}>
+            <footer className="footer">
               Stay tuned for more updates and exciting developments.
-            </motion.p>
+            </footer>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
 

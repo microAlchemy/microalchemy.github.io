@@ -7,7 +7,7 @@ yarn-error.log*
 # Production build
 dist/
 build/
-public/rss.xml
+.astro/
 
 # Environment variables
 .env

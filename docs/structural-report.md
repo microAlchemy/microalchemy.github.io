@@ -1,15 +1,16 @@
 # Structural Weakness Report
 
-Date: 2025-12-01 (re-evaluated)
+Date: 2026-09-05 (re-evaluated)
 
 ## Resolved
-- CI guardrails now exist (lint:blog + RSS + build) via `.github/workflows/ci.yml`, with `npm run check` and a Dockerfile for parity.
-- Blog frontmatter validation is centralized and strict (required fields, slug uniqueness, tag types) and reused by both the linter and RSS generator; runtime also throws on invalid data.
-- RSS feed is richer (author/categories) and regenerated via `prebuild`; the feed file is no longer tracked in git to avoid timestamp drift.
-- Blog post rendering is wrapped in an error boundary so MDX import/render issues surface clearly.
-- `.editorconfig` and `.gitattributes` are present to normalize line endings/formatting; `.nvmrc` documents Node 18+.
-- Oversized hero/team media trimmed (Aditya portrait ~17MB → ~184KB) to keep bundle size reasonable.
-- Posts loader now uses a single dynamic glob (no eager + lazy duplication), removing Vite double-import warnings and keeping RSS/slugs deduplicated.
+- Astro statically generates the homepage, blog, careers, and job routes so every indexable URL ships complete HTML.
+- Content collections validate blog and job frontmatter during the build.
+- RSS and XML sitemaps are generated from the same collections as the public pages.
+- CI checks titles, descriptions, canonicals, crawl directives, headings, schema, and required discovery files in the generated output.
+- The custom 404 is a real error page and no longer redirects through browser storage.
+- Homepage photos and raster partner logos have optimized WebP variants, explicit dimensions, and lazy loading.
+- `.editorconfig`, `.gitattributes`, and `.nvmrc` normalize development and document Node 24+.
 
 ## Remaining risks / follow-ups
-- Enforce Node 18+ everywhere (CI already does; local dev on older runtimes still fails). Consider a preflight that checks engines before scripts run.
+- Review `docs/seo-copy-review.md` before publishing product claims or job expiration dates.
+- Add an approved 1200×630 social-sharing image when a brand-owned asset is available.

@@ -1,11 +1,10 @@
-import { FormEvent, useEffect, useRef, useState } from 'react'
-import type { MutableRefObject } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { jobs } from '../jobs/jobs'
+import { useEffect, useRef, useState } from 'react'
+import type { RefObject, SubmitEvent as ReactSubmitEvent } from 'react'
 import './intake.css'
 
 type Audience = 'applicant' | 'customer' | 'investor'
 type SubmissionState = 'idle' | 'submitting' | 'success' | 'error'
+type JobOption = { slug: string; title: string }
 
 type TurnstileApi = {
   render: (container: HTMLElement, options: Record<string, unknown>) => string
@@ -28,7 +27,7 @@ const audienceCopy: Record<Audience, { eyebrow: string; title: string; descripti
   customer: {
     eyebrow: 'Customer & partner intake',
     title: 'Build with us',
-    description: '',
+    description: 'Tell us what you are designing, where you are in the process, and what fabrication or tooling support you need.',
   },
   investor: {
     eyebrow: 'Invest with us',
@@ -105,7 +104,7 @@ const TurnstileWidget = ({
 }: {
   siteKey: string
   onToken: (token: string) => void
-  widgetIdRef: MutableRefObject<string | undefined>
+  widgetIdRef: RefObject<string | undefined>
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -174,7 +173,7 @@ const CommonFields = ({ audience }: { audience: Audience }) => (
   </>
 )
 
-const ApplicantFields = ({ role, setRole }: { role: string; setRole: (value: string) => void }) => {
+const ApplicantFields = ({ role, setRole, jobOptions }: { role: string; setRole: (value: string) => void; jobOptions: JobOption[] }) => {
   const roleExperience = experienceOptions[role] ?? []
 
   return (
@@ -183,8 +182,8 @@ const ApplicantFields = ({ role, setRole }: { role: string; setRole: (value: str
         <label className="intake-field intake-field-wide">
           <span>Role <b>*</b></span>
           <select name="role" value={role} onChange={(event) => setRole(event.target.value)} required>
-            {jobs.map((job) => (
-              <option key={job.slug} value={job.slug}>{job.frontmatter.title}</option>
+            {jobOptions.map((job) => (
+              <option key={job.slug} value={job.slug}>{job.title}</option>
             ))}
           </select>
         </label>
@@ -359,12 +358,9 @@ const InvestorFields = () => (
   </>
 )
 
-const IntakePage = ({ audience }: { audience: Audience }) => {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const requestedRole = searchParams.get('role')
-  const initialRole = jobs.some((job) => job.slug === requestedRole) ? requestedRole! : jobs[0]?.slug ?? ''
-  const [role, setRole] = useState(initialRole)
+const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: JobOption[] }) => {
+  const [role, setRole] = useState(jobOptions[0]?.slug ?? '')
+  const [presetInterest, setPresetInterest] = useState('')
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle')
   const [statusMessage, setStatusMessage] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
@@ -373,17 +369,23 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
   const applicantFollowUpRef = useRef<HTMLElement>(null)
   const bookingRef = useRef<HTMLElement>(null)
 
-  const endpoint = import.meta.env.VITE_INTAKE_API_URL || 'https://microalchemy-intake.kunal-chandan.workers.dev/submit'
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? '1x00000000000000000000AA' : '')
+  const endpoint = import.meta.env.PUBLIC_INTAKE_API_URL || 'https://microalchemy-intake.kunal-chandan.workers.dev/submit'
+  const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? '1x00000000000000000000AA' : '')
   const copy = audienceCopy[audience]
 
   useEffect(() => {
-    if (audience === 'applicant') setRole(initialRole)
+    const params = new URLSearchParams(window.location.search)
+    const requestedRole = params.get('role')
+    if (audience === 'applicant') {
+      const requestedRoleExists = jobOptions.some((job) => job.slug === requestedRole)
+      setRole(requestedRoleExists ? requestedRole! : jobOptions[0]?.slug ?? '')
+    }
+    setPresetInterest(params.get('interest') ?? '')
     setSubmissionState('idle')
     setStatusMessage('')
     setTurnstileToken('')
     startedAtRef.current = Date.now()
-  }, [audience, initialRole])
+  }, [audience, jobOptions])
 
   useEffect(() => {
     if (submissionState === 'success') {
@@ -405,7 +407,7 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
     return ''
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: ReactSubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     const data = new FormData(form)
@@ -421,8 +423,9 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
     data.set('formStartedAt', String(startedAtRef.current))
     data.set('sourcePath', `${window.location.pathname}${window.location.search}`)
     data.set('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone)
+    const currentParams = new URLSearchParams(window.location.search)
     for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
-      const value = searchParams.get(key)
+      const value = currentParams.get(key)
       if (value) data.set(key, value)
     }
 
@@ -458,8 +461,8 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
             {copy.description ? <p>{copy.description}</p> : null}
           </div>
           <nav className="intake-nav" aria-label="Page navigation">
-            <Link to="/">Home</Link>
-            <Link to="/careers">Careers</Link>
+            <a href="/">Home</a>
+            <a href="/careers/">Careers</a>
           </nav>
         </header>
 
@@ -469,11 +472,11 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
             <p>Fields marked * are required.</p>
           </div>
 
-          <form key={`${audience}-${initialRole}`} onSubmit={handleSubmit} className="intake-form">
+          <form key={audience} onSubmit={handleSubmit} className="intake-form">
             <input className="intake-honeypot" type="text" name="companyFax" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <CommonFields audience={audience} />
-            {audience === 'applicant' ? <ApplicantFields role={role} setRole={setRole} /> : null}
-            {audience === 'customer' ? <CustomerFields presetInterest={searchParams.get('interest') ?? ''} /> : null}
+            {audience === 'applicant' ? <ApplicantFields role={role} setRole={setRole} jobOptions={jobOptions} /> : null}
+            {audience === 'customer' ? <CustomerFields presetInterest={presetInterest} /> : null}
             {audience === 'investor' ? <InvestorFields /> : null}
 
             <label className="intake-check intake-consent">
@@ -505,7 +508,7 @@ const IntakePage = ({ audience }: { audience: Audience }) => {
                   <h2 id="applicant-follow-up-title">Have a project in mind too?</h2>
                   <p>Your application is complete. If you are also designing or fabricating something, tell us how we can build it with you.</p>
                 </div>
-                <button type="button" onClick={() => navigate('/build-with-us')}>Build with us →</button>
+                <button type="button" onClick={() => window.location.assign('/build-with-us/')}>Build with us →</button>
               </aside>
             ) : null}
 

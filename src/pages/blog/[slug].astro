@@ -1,0 +1,79 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { getCollection, render } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate, getSlug, ORGANIZATION_ID, SITE_URL } from '../../lib/site'
+import '../../routes/blog.css'
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog')
+  return posts.map((post) => ({
+    params: { slug: getSlug(post.id) },
+    props: { post },
+  }))
+}) satisfies GetStaticPaths
+
+const { post } = Astro.props
+const { Content } = await render(post)
+const slug = getSlug(post.id)
+const canonicalPath = `/blog/${slug}/`
+const modifiedAt = post.data.modifiedAt ?? post.data.date
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.summary,
+  image: `${SITE_URL}/social-card.png`,
+  datePublished: post.data.date.toISOString(),
+  dateModified: modifiedAt.toISOString(),
+  mainEntityOfPage: `${SITE_URL}${canonicalPath}`,
+  author: {
+    '@type': 'Organization',
+    name: post.data.author,
+    url: `${SITE_URL}/`,
+  },
+  publisher: { '@id': ORGANIZATION_ID },
+  isPartOf: {
+    '@type': 'Blog',
+    name: 'MicroAlchemy Blog',
+    url: `${SITE_URL}/blog/`,
+  },
+  inLanguage: 'en-CA',
+}
+---
+
+<BaseLayout
+  title={`${post.data.title} | MicroAlchemy`}
+  description={post.data.summary}
+  canonicalPath={canonicalPath}
+  type="article"
+  publishedTime={post.data.date}
+  modifiedTime={modifiedAt}
+  structuredData={articleJsonLd}
+>
+  <main class="blog-shell">
+    <div class="blog-container">
+      <header class="blog-header blog-post-header">
+        <div>
+          <div class="blog-eyebrow">MicroAlchemy blog</div>
+          <h1 class="blog-title">{post.data.title}</h1>
+          <div class="blog-meta">
+            <span>{post.data.author}</span>
+            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, true)}</time>
+            {post.data.tags.map((tag) => <span class="blog-tag">{tag}</span>)}
+          </div>
+          <p class="blog-lede">{post.data.summary}</p>
+        </div>
+        <nav class="blog-nav" aria-label="Article navigation">
+          <a href="/blog/" class="ghost-link">All posts</a>
+          <a href="/" class="ghost-link">Home</a>
+          <a href="/rss.xml" class="ghost-link">RSS</a>
+        </nav>
+      </header>
+
+      <article class="blog-article">
+        <Content />
+      </article>
+    </div>
+  </main>
+</BaseLayout>

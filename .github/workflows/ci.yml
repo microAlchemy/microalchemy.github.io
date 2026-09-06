@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint blog frontmatter
-        run: npm run lint:blog
-
       - name: Build project
         run: npm run build
         env:

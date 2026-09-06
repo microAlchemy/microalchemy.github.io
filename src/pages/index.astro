@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content'
+import CircuitBoardAnimation from '../components/CircuitBoardAnimation'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getSlug, organizationJsonLd, websiteJsonLd } from '../lib/site'
+import '../App.css'
+
+const newsPosts = (await getCollection('blog'))
+  .filter((post) => post.data.tags.some((tag) => tag.toLowerCase() === 'news'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
+  .map((post) => ({
+    slug: getSlug(post.id),
+    title: post.data.title,
+    date: post.data.date.toISOString(),
+    summary: post.data.summary,
+  }))
+---
+
+<BaseLayout
+  title="MicroAlchemy | Rapid Silicon Prototyping & Open-Source EDA"
+  description="MicroAlchemy develops rapid silicon fabrication and open-source EDA tooling, targeting wafers in under three weeks on a 1μm process."
+  canonicalPath="/"
+  structuredData={[organizationJsonLd, websiteJsonLd]}
+>
+  <CircuitBoardAnimation newsPosts={newsPosts} client:load />
+</BaseLayout>

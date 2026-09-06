@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { employmentTypeLabels, formatDate, getSlug } from '../../lib/site'
+import '../../routes/blog.css'
+
+const jobs = (await getCollection('jobs'))
+  .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime())
+
+const categories = [
+  'Engineering',
+  'Engineering > Hardware',
+  'Engineering > Process',
+  'Engineering > Software',
+  'Other',
+  'Internships',
+  'Admin/HR/Legal',
+]
+const workModes = ['Remote', 'Onsite']
+---
+
+<BaseLayout
+  title="Semiconductor & EDA Careers | MicroAlchemy"
+  description="Explore open engineering roles at MicroAlchemy in semiconductor fabrication, hardware systems, and electronic design automation."
+  canonicalPath="/careers/"
+>
+  <main class="blog-shell">
+    <div class="blog-container">
+      <header class="blog-header">
+        <div>
+          <div class="blog-eyebrow">MicroAlchemy careers</div>
+          <h1 class="blog-title">Open roles</h1>
+          <p class="blog-lede">Build the tools and fabrication systems that shorten the path from an idea to working silicon.</p>
+        </div>
+        <nav class="blog-nav" aria-label="Careers navigation">
+          <a href="/" class="ghost-link">Home</a>
+          <a href="/blog/" class="ghost-link">Blog</a>
+        </nav>
+      </header>
+
+      <div class="jobs-controls" aria-label="Job filters">
+        <label class="jobs-control">
+          <span>Category</span>
+          <select data-job-category>
+            <option value="All">All categories</option>
+            {categories.map((category) => <option value={category}>{category}</option>)}
+          </select>
+        </label>
+        <label class="jobs-control">
+          <span>Sort</span>
+          <select data-job-sort>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="title">Title</option>
+            <option value="category">Category</option>
+          </select>
+        </label>
+        <label class="jobs-control">
+          <span>Work mode</span>
+          <select data-job-work-mode>
+            <option value="All">All work modes</option>
+            {workModes.map((mode) => <option value={mode}>{mode}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <section class="blog-grid jobs-grid" data-jobs-grid aria-label="Open positions">
+        {jobs.map((job) => (
+          <a
+            href={`/careers/${getSlug(job.id)}/`}
+            class="blog-card job-card"
+            data-job-card
+            data-category={job.data.category}
+            data-work-mode={job.data.workMode ?? ''}
+            data-posted-at={job.data.postedAt.toISOString()}
+            data-title={job.data.title}
+          >
+            <time class="blog-card-date" datetime={job.data.postedAt.toISOString()}>Posted {formatDate(job.data.postedAt)}</time>
+            <h2 class="blog-card-title">{job.data.title}</h2>
+            <div class="blog-tags">
+              <span class="blog-tag">{job.data.category}</span>
+              {job.data.workMode && <span class="blog-tag">{job.data.workMode}</span>}
+              {job.data.location && <span class="blog-tag">{job.data.location}</span>}
+              <span class="blog-tag">{employmentTypeLabels[job.data.employmentType]}</span>
+            </div>
+            <p class="blog-card-summary">{job.data.summary}</p>
+            <span class="blog-card-action">View role</span>
+          </a>
+        ))}
+      </section>
+
+      <section class="blog-not-found" data-jobs-empty hidden aria-live="polite">
+        <h2>No roles match this filter</h2>
+        <p>Try another category or work mode.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const categorySelect = document.querySelector('[data-job-category]')
+    const sortSelect = document.querySelector('[data-job-sort]')
+    const workModeSelect = document.querySelector('[data-job-work-mode]')
+    const grid = document.querySelector('[data-jobs-grid]')
+    const emptyState = document.querySelector('[data-jobs-empty]')
+
+    const updateJobs = () => {
+      if (!(categorySelect instanceof HTMLSelectElement)
+        || !(sortSelect instanceof HTMLSelectElement)
+        || !(workModeSelect instanceof HTMLSelectElement)
+        || !(grid instanceof HTMLElement)
+        || !(emptyState instanceof HTMLElement)) return
+
+      const cards = Array.from(grid.querySelectorAll('[data-job-card]'))
+      const visibleCards = cards.filter((card) => {
+        if (!(card instanceof HTMLElement)) return false
+        const categoryMatches = categorySelect.value === 'All'
+          || (categorySelect.value === 'Engineering' && (card.dataset.category ?? '').startsWith('Engineering >'))
+          || card.dataset.category === categorySelect.value
+        const workModeMatches = workModeSelect.value === 'All' || card.dataset.workMode === workModeSelect.value
+        card.hidden = !(categoryMatches && workModeMatches)
+        return !card.hidden
+      })
+
+      cards.sort((left, right) => {
+        if (!(left instanceof HTMLElement) || !(right instanceof HTMLElement)) return 0
+        if (sortSelect.value === 'title') return (left.dataset.title ?? '').localeCompare(right.dataset.title ?? '')
+        if (sortSelect.value === 'category') {
+          return (left.dataset.category ?? '').localeCompare(right.dataset.category ?? '')
+            || (left.dataset.title ?? '').localeCompare(right.dataset.title ?? '')
+        }
+        const timeDifference = Date.parse(left.dataset.postedAt ?? '') - Date.parse(right.dataset.postedAt ?? '')
+        return sortSelect.value === 'oldest' ? timeDifference : -timeDifference
+      })
+      cards.forEach((card) => grid.append(card))
+      emptyState.hidden = visibleCards.length > 0
+    }
+
+    categorySelect?.addEventListener('change', updateJobs)
+    sortSelect?.addEventListener('change', updateJobs)
+    workModeSelect?.addEventListener('change', updateJobs)
+  </script>
+</BaseLayout>

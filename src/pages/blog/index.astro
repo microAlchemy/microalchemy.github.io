@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate, getSlug } from '../../lib/site'
+import '../../routes/blog.css'
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+---
+
+<BaseLayout
+  title="Silicon Fabrication & EDA Notes | MicroAlchemy"
+  description="News from the MicroAlchemy team."
+  canonicalPath="/blog/"
+>
+  <main class="blog-shell">
+    <div class="blog-container">
+      <header class="blog-header">
+        <div>
+          <div class="blog-eyebrow">MicroAlchemy</div>
+          <h1 class="blog-title">Notes from the lab</h1>
+          <p class="blog-lede">News from the MicroAlchemy team.</p>
+        </div>
+        <nav class="blog-nav" aria-label="Blog navigation">
+          <a href="/" class="ghost-link">← Back home</a>
+          <a href="/rss.xml" class="ghost-link">RSS feed</a>
+        </nav>
+      </header>
+
+      <section class="blog-grid" aria-label="Blog posts">
+        {posts.map((post) => (
+          <a href={`/blog/${getSlug(post.id)}/`} class="blog-card">
+            <time class="blog-card-date" datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+            <h2 class="blog-card-title">{post.data.title}</h2>
+            <div class="blog-card-author">By {post.data.author}</div>
+            <p class="blog-card-summary">{post.data.summary}</p>
+            {post.data.tags.length > 0 && (
+              <div class="blog-tags" aria-label="Topics">
+                {post.data.tags.map((tag) => <span class="blog-tag">{tag}</span>)}
+              </div>
+            )}
+          </a>
+        ))}
+      </section>
+    </div>
+  </main>
+</BaseLayout>
