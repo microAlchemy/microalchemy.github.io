@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/check-seo-output.mjs",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/check-seo-output.mjs && node scripts/check-intake-output.mjs",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "social-card": "node scripts/generate-social-card.mjs",
     "intake:check": "tsc -p worker/tsconfig.json",

@@ -153,11 +153,18 @@ const TurnstileWidget = ({
   return <div ref={containerRef} className="intake-turnstile" aria-label="Security verification" />
 }
 
-const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
-const phoneCountries = getCountries().map((code) => ({ code, name: countryNames.of(code) ?? code }))
-  .sort((a, b) => a.name.localeCompare(b.name, 'en'))
+const CommonFields = ({ audience }: { audience: Audience }) => {
+  // Node and browsers can ship different ICU country names and sort orders.
+  // Keep the server and first client render identical, then localize after mount.
+  const [phoneCountries, setPhoneCountries] = useState(() =>
+    getCountries().map((code) => ({ code, name: String(code) })))
+  useEffect(() => {
+    const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+    setPhoneCountries(getCountries().map((code) => ({ code, name: countryNames.of(code) ?? code }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'en')))
+  }, [])
 
-const CommonFields = ({ audience }: { audience: Audience }) => (
+  return (
   <>
     <div className="intake-form-grid">
       <label className="intake-field">
@@ -186,7 +193,8 @@ const CommonFields = ({ audience }: { audience: Audience }) => (
       </label>
     </div>
   </>
-)
+  )
+}
 
 const ApplicantFields = ({ role, setRole, jobOptions }: { role: string; setRole: (value: string) => void; jobOptions: JobOption[] }) => {
   const roleExperience = experienceOptions[role] ?? []
