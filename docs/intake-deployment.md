@@ -33,7 +33,11 @@ npx wrangler secret put TWENTY_CUSTOMER_WEBHOOK_URL --config worker/wrangler.jso
 npx wrangler secret put TWENTY_INVESTOR_WEBHOOK_URL --config worker/wrangler.jsonc
 ```
 
-`TWENTY_API_KEY` uses the dedicated **Website Intake File Uploader** role. It needs `UPLOAD_FILE` and read-only access to **Workflow Runs** for completion checks, in addition to invoking the three authenticated intake workflows. It does not need permission to create contacts: the workflows perform record operations in Twenty. The Worker sends this key as a bearer token; it is never included in the GitHub Pages bundle. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
+`TWENTY_API_KEY` uses the dedicated, API-key-only **Website Intake File Uploader** role. It needs `UPLOAD_FILE` and the `WORKFLOWS` permission flag for completion checks, in addition to invoking the three authenticated intake workflows. It does not need permission to create contacts: the workflows perform record operations in Twenty. The Worker sends this key as a bearer token; it is never included in the GitHub Pages bundle. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
+
+**Permission caveat:** Twenty gates Workflow, Workflow Version, and Workflow Run access behind `WORKFLOWS`, ignoring per-object read-only overrides for those objects. The flag also grants workflow management, including editing and deletion; it is not a read-only grant. Obtain explicit owner approval before enabling it, preserve `UPLOAD_FILE`, and leave all other global record/settings/tool access disabled. This broader workflow permission was approved for the production intake role on 2026-09-08. The relay itself only reads existing run status and invokes the configured intake workflows.
+
+If a submission is complete in CRM but the relay remains `processing`, check for HTTP 400 permission failures on the status lookup and verify the API key's role has `WORKFLOWS`. A read-only Workflow Runs override alone is insufficient. Restore access within the one-hour checking window and the next receipt alarm will reconcile the existing run without resending notifications. After the window expires, the receipt needs support review; do not submit it again.
 
 Deploy the Worker:
 

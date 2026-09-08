@@ -150,6 +150,26 @@ test('temporary workflow status error remains processing rather than false succe
   assert.equal((await storage.get('receipt')).status, 'processing')
   assert.ok(storage.alarm > Date.now())
 })
+test('restoring workflow read permission completes the existing receipt without redelivery', async () => {
+  await submit()
+  const authorizedFetch = globalThis.fetch
+  globalThis.fetch = async (url, options) => String(url).includes('/rest/workflowRuns/')
+    ? Response.json({ messages: ['Entity performing the request does not have permission'] }, { status: 400 })
+    : authorizedFetch(url, options)
+  const { object, storage } = objects.get(submissionId)
+  await object.alarm()
+  assert.equal((await storage.get('receipt')).status, 'processing')
+  assert.ok(storage.alarm > Date.now())
+
+  globalThis.fetch = authorizedFetch
+  await object.alarm()
+  const receipt = await storage.get('receipt')
+  assert.equal(receipt.status, 'completed')
+  assert.equal(receipt.runId, runId)
+  assert.equal(receipt.payload, undefined)
+  assert.equal(webhookCalls().length, 1, 'permission recovery must not resend notifications')
+  assert.equal(calls.filter((call) => call.url.endsWith('/metadata')).length, 1)
+})
 test('missing run after interruption becomes needs_review', async () => {
   await submit()
   const { object, storage } = objects.get(submissionId)

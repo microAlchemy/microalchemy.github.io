@@ -45,7 +45,7 @@ Company upserts use Twenty's configured unique-field matching. A domain enables 
 
 Copy the active version to a draft, edit it, validate once after all edits, and activate it. Keep `continueOnFailure` false. A successful webhook acknowledgement only means the workflow was enqueued.
 
-The Worker role needs file-upload permission plus read-only Workflow Runs access. Receipt alarms observe the whole workflow. `COMPLETED` means both send actions finished; inbox delivery is a separate provider concern. Connect the sending mailbox with send permission under Settings → Accounts.
+The Worker role needs `UPLOAD_FILE` plus the `WORKFLOWS` permission flag. Twenty ignores per-object read-only overrides for workflow objects; `WORKFLOWS` also permits workflow management, including editing and deletion, so enabling it requires explicit owner approval. Keep the role API-key-only and leave unrelated permissions disabled. See `docs/intake-deployment.md` for the permission caveat and status-lookup troubleshooting. Receipt alarms observe the whole workflow. `COMPLETED` means both send actions finished; inbox delivery is a separate provider concern. Connect the sending mailbox with send permission under Settings → Accounts.
 
 Before a real end-to-end test, authorize its record creation and notification emails. Exercise all audiences, local/international phones, a blank date, absent optional contact details, upload, retries, and downstream failures. Local regression tests mock external services and do not send mail.
 
