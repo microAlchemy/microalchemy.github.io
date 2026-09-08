@@ -33,13 +33,19 @@ npx wrangler secret put TWENTY_CUSTOMER_WEBHOOK_URL --config worker/wrangler.jso
 npx wrangler secret put TWENTY_INVESTOR_WEBHOOK_URL --config worker/wrangler.jsonc
 ```
 
-`TWENTY_API_KEY` should use a dedicated, least-privilege Twenty role that can upload the Applications `Résumé` file and invoke the three authenticated intake workflows. The Worker sends this key to Twenty as a bearer token; it is never included in the GitHub Pages bundle. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
+`TWENTY_API_KEY` uses the dedicated **Website Intake File Uploader** role. It needs `UPLOAD_FILE` and read-only access to **Workflow Runs** for completion checks, in addition to invoking the three authenticated intake workflows. It does not need permission to create contacts: the workflows perform record operations in Twenty. The Worker sends this key as a bearer token; it is never included in the GitHub Pages bundle. Twenty's API URL and the universal identifier of the Applications `Résumé` field are non-secret Worker variables in `worker/wrangler.jsonc`.
 
 Deploy the Worker:
 
 ```bash
 npm run intake:deploy
 ```
+
+The first deployment creates the `IntakeReceipt` SQLite Durable Object namespace using the checked-in migration. Do not remove or rename this binding when deploying subsequent versions. Receipts prevent duplicate webhook delivery for the same submission reference for seven days. Cloudflare supports SQLite Durable Objects on the Workers Free plan.
+
+Deploy the Worker and activate the matching Twenty workflow versions before publishing the website. GitHub Pages publishes only the static site; it does not deploy the Worker or CRM workflows.
+
+Before deployment, run `npm run check`, `npm run intake:test`, and `npm run intake:build`. CI runs the isolated regression tests without creating CRM records or sending mail.
 
 Either attach `intake.microalchemy.xyz` as a Worker custom domain or keep the generated `workers.dev` URL.
 
@@ -71,4 +77,20 @@ npm run intake:dev
 - Twenty stores those files in its existing private Google Cloud Storage configuration; no Cloudflare R2 subscription or bucket is required.
 - Webhook URLs and all other secrets are Worker secrets, not GitHub Pages variables.
 - The Worker authenticates each relay request to Twenty with the private `TWENTY_API_KEY`; the static site never receives that credential.
-- The Google booking page loads only after a customer or investor submission succeeds, so the CRM intake is recorded before scheduling.
+- The Google booking page loads only after Twenty reports that the entire workflow completed, including both notification actions. This confirms the send actions completed; it does not prove delivery to an inbox.
+
+## Receipt and failure handling
+
+- `POST /submit` accepts the form and a random UUID v4 `submissionId`. Older clients without an ID receive one from the Worker. New clients retain the same reference across retries.
+- A valid acknowledgement must contain `success: true` and a workflow run ID. HTTP success alone, HTML responses, and malformed acknowledgements are not treated as completion.
+- `POST /status` takes `{ "submissionId": "..." }` and returns only `processing`, `completed`, `failed`, or `needs_review`, plus a public message. The UUID is an unguessable receipt capability; never publish real submission IDs in public reports.
+- Durable Object alarms read `/rest/workflowRuns/{id}?depth=0`, with bounded requests and backoff, for up to one hour. Status checks continue if the visitor closes the tab. Temporary read failures remain pending; they do not cause webhook redelivery.
+- Workflow failures, interrupted delivery, or unconfirmed completion retain the validated payload and uploaded file reference for support review. The form displays a reference and asks the visitor to contact Kunal instead of submitting again.
+- Completed receipts immediately discard their form payload. All receipts expire after seven days. Resume binaries remain in Twenty; this relay never stores them in receipt storage. Cloudflare platform backups may retain deleted data according to its retention policy.
+- Logs include submission reference, workflow run ID, and outcome without printing the full form. `/health` checks required relay bindings and configuration only; it is not a downstream CRM/mailbox health check.
+
+## Recovering a failed submission
+
+Find the run in Twenty's workflow history and inspect every step before retrying. A failure may occur after a record or one email already succeeded. Correct the input or mapping, confirm the intended phone country with the applicant if it is ambiguous, and recover using the original submission ID and existing résumé file reference. Never infer a country from a bare local phone number or blindly rerun both email actions. The application/opportunity/engagement primary ID is the submission ID, so repeated upserts of that same submission target the same record.
+
+An applicant failure caused by an unqualified local phone number needs a confirmed country before recovery. Publishing new workflow versions does not replay historical runs.

@@ -1,0 +1,307 @@
+{
+  "workflowId": "574ac2fb-f761-40fe-a0c5-fe5f0af44cf0",
+  "workflowVersionId": "a4389a7e-cd8d-4aec-ab2f-479bb34bcc1c",
+  "trigger": {
+    "name": "Customer form submitted",
+    "type": "WEBHOOK",
+    "position": {
+      "x": 220,
+      "y": 0
+    },
+    "settings": {
+      "httpMethod": "POST",
+      "expectedBody": {
+        "email": "customer@example.com",
+        "details": "Example project",
+        "fullName": "Example Customer",
+        "jobTitle": "VP Engineering",
+        "lastName": "Customer",
+        "timeline": "This quarter",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=customer",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "organization": "Example Labs",
+        "projectStage": "Evaluating",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "interestAreas": [
+          "ASIC design"
+        ],
+        "notificationBody": "Customer summary",
+        "interestAreasText": "ASIC design",
+        "notificationSubject": "New customer interest: Example Labs",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "outputSchema": {
+        "email": "customer@example.com",
+        "details": "Example project",
+        "fullName": "Example Customer",
+        "jobTitle": "VP Engineering",
+        "lastName": "Customer",
+        "timeline": "This quarter",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=customer",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "organization": "Example Labs",
+        "projectStage": "Evaluating",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "interestAreas": [
+          "ASIC design"
+        ],
+        "notificationBody": "Customer summary",
+        "interestAreasText": "ASIC design",
+        "notificationSubject": "New customer interest: Example Labs",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "authentication": "API_KEY",
+      "expectedOutputSchema": {
+        "email": "customer@example.com",
+        "details": "Example project",
+        "fullName": "Example Customer",
+        "jobTitle": "VP Engineering",
+        "lastName": "Customer",
+        "timeline": "This quarter",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=customer",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "organization": "Example Labs",
+        "projectStage": "Evaluating",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "interestAreas": [
+          "ASIC design"
+        ],
+        "notificationBody": "Customer summary",
+        "interestAreasText": "ASIC design",
+        "notificationSubject": "New customer interest: Example Labs",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      }
+    },
+    "nextStepIds": [
+      "61a5e7ff-4e9e-4d26-a8e9-b36d6c3e0641"
+    ]
+  },
+  "steps": [
+    {
+      "id": "dc2f1beb-dabc-4405-a2ef-cb2a225ef167",
+      "name": "Upsert customer contact",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 132
+      },
+      "settings": {
+        "input": {
+          "objectName": "person",
+          "objectRecord": {
+            "name": {
+              "lastName": "{{trigger.lastName}}",
+              "firstName": "{{trigger.firstName}}"
+            },
+            "emails": {
+              "primaryEmail": "{{trigger.email}}"
+            },
+            "company": {
+              "id": "{{61a5e7ff-4e9e-4d26-a8e9-b36d6c3e0641.id}}"
+            },
+            "jobTitle": "{{trigger.jobTitle}}",
+            "phones": "{{trigger.phones}}",
+            "linkedinLink": "{{trigger.profileLink}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "067a2a0c-c35d-486f-aa79-08d6a5cc6943"
+      ]
+    },
+    {
+      "id": "067a2a0c-c35d-486f-aa79-08d6a5cc6943",
+      "name": "Upsert opportunity",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 396
+      },
+      "settings": {
+        "input": {
+          "objectName": "opportunity",
+          "objectRecord": {
+            "name": "{{trigger.organization}} — Website customer interest",
+            "company": {
+              "id": "{{61a5e7ff-4e9e-4d26-a8e9-b36d6c3e0641.id}}"
+            },
+            "sourcePath": "{{trigger.sourcePath}}",
+            "submittedAt": "{{trigger.submittedAt}}",
+            "intakeSummary": "Details:\n{{trigger.details}}\n\nSubmitted summary:\n{{trigger.notificationBody}}",
+            "intakeTimeline": "{{trigger.timeline}}",
+            "pointOfContact": {
+              "id": "{{dc2f1beb-dabc-4405-a2ef-cb2a225ef167.id}}"
+            },
+            "intakeOrganization": "{{trigger.organization}}",
+            "intakeProjectStage": "{{trigger.projectStage}}",
+            "intakeSubmissionId": "{{trigger.submissionId}}",
+            "intakeInterestAreas": "{{trigger.interestAreasText}}",
+            "id": "{{trigger.submissionId}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "5d29a622-a270-4439-bfa1-a91699d20d64",
+        "6e673ccd-84a1-41d1-ad4d-2fd9ff7f64c0"
+      ]
+    },
+    {
+      "id": "5d29a622-a270-4439-bfa1-a91699d20d64",
+      "name": "Notify Kunal",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "kunal@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    },
+    {
+      "id": "6e673ccd-84a1-41d1-ad4d-2fd9ff7f64c0",
+      "name": "Notify Aditya",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": {
+        "x": 440,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "aditya@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    },
+    {
+      "id": "61a5e7ff-4e9e-4d26-a8e9-b36d6c3e0641",
+      "name": "Upsert customer company",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 264
+      },
+      "settings": {
+        "input": {
+          "objectName": "company",
+          "objectRecord": {
+            "name": "{{trigger.organization}}",
+            "domainName": "{{trigger.companyDomain}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "dc2f1beb-dabc-4405-a2ef-cb2a225ef167"
+      ]
+    }
+  ]
+}

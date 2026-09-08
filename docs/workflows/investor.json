@@ -1,0 +1,294 @@
+{
+  "workflowId": "d9c0a4f3-2050-497c-9032-a14aec40648a",
+  "workflowVersionId": "8d53b3f8-95bb-4768-87be-b59af8ca33e8",
+  "trigger": {
+    "name": "Investor form submitted",
+    "type": "WEBHOOK",
+    "position": {
+      "x": 220,
+      "y": 0
+    },
+    "settings": {
+      "httpMethod": "POST",
+      "expectedBody": {
+        "email": "investor@example.com",
+        "details": "Deep-tech semiconductors",
+        "fullName": "Example Investor",
+        "jobTitle": "Partner",
+        "lastName": "Investor",
+        "checkSize": "$500k–$2m",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=investor",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "investorType": "Venture capital",
+        "organization": "Example Capital",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "notificationBody": "Investor summary",
+        "notificationSubject": "New investor interest: Example Investor",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "outputSchema": {
+        "email": "investor@example.com",
+        "details": "Deep-tech semiconductors",
+        "fullName": "Example Investor",
+        "jobTitle": "Partner",
+        "lastName": "Investor",
+        "checkSize": "$500k–$2m",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=investor",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "investorType": "Venture capital",
+        "organization": "Example Capital",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "notificationBody": "Investor summary",
+        "notificationSubject": "New investor interest: Example Investor",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "authentication": "API_KEY",
+      "expectedOutputSchema": {
+        "email": "investor@example.com",
+        "details": "Deep-tech semiconductors",
+        "fullName": "Example Investor",
+        "jobTitle": "Partner",
+        "lastName": "Investor",
+        "checkSize": "$500k–$2m",
+        "firstName": "Example",
+        "sourcePath": "/intake?type=investor",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "investorType": "Venture capital",
+        "organization": "Example Capital",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "notificationBody": "Investor summary",
+        "notificationSubject": "New investor interest: Example Investor",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      }
+    },
+    "nextStepIds": [
+      "b436f103-b1c7-4212-8d14-01b10e6ccca6"
+    ]
+  },
+  "steps": [
+    {
+      "id": "3d10794b-f38b-490c-864c-088a1af4eba0",
+      "name": "Upsert investor contact",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 132
+      },
+      "settings": {
+        "input": {
+          "objectName": "person",
+          "objectRecord": {
+            "name": {
+              "lastName": "{{trigger.lastName}}",
+              "firstName": "{{trigger.firstName}}"
+            },
+            "emails": {
+              "primaryEmail": "{{trigger.email}}"
+            },
+            "company": {
+              "id": "{{b436f103-b1c7-4212-8d14-01b10e6ccca6.id}}"
+            },
+            "jobTitle": "{{trigger.jobTitle}}",
+            "phones": "{{trigger.phones}}",
+            "linkedinLink": "{{trigger.profileLink}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "d8f6ada3-a393-42e0-8866-a489d29ff31e"
+      ]
+    },
+    {
+      "id": "d8f6ada3-a393-42e0-8866-a489d29ff31e",
+      "name": "Upsert investor engagement",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 396
+      },
+      "settings": {
+        "input": {
+          "objectName": "investorEngagement",
+          "objectRecord": {
+            "name": "{{trigger.fullName}} — {{trigger.organization}}",
+            "sourcePath": "{{trigger.sourcePath}}",
+            "submittedAt": "{{trigger.submittedAt}}",
+            "intakeSummary": "Details:\n{{trigger.details}}\n\nSubmitted summary:\n{{trigger.notificationBody}}",
+            "intakeCheckSize": "{{trigger.checkSize}}",
+            "investorCompany": {
+              "id": "{{b436f103-b1c7-4212-8d14-01b10e6ccca6.id}}"
+            },
+            "intakeInvestorType": "{{trigger.investorType}}",
+            "intakeOrganization": "{{trigger.organization}}",
+            "intakeSubmissionId": "{{trigger.submissionId}}",
+            "primaryInvestorContact": {
+              "id": "{{3d10794b-f38b-490c-864c-088a1af4eba0.id}}"
+            },
+            "id": "{{trigger.submissionId}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "35941e81-2ecf-436e-a3f7-8e9a055013f4",
+        "5c0924e2-3dd6-4fa5-ab39-2e1e1cce7843"
+      ]
+    },
+    {
+      "id": "35941e81-2ecf-436e-a3f7-8e9a055013f4",
+      "name": "Notify Kunal",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "kunal@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    },
+    {
+      "id": "5c0924e2-3dd6-4fa5-ab39-2e1e1cce7843",
+      "name": "Notify Aditya",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": {
+        "x": 440,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "aditya@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    },
+    {
+      "id": "b436f103-b1c7-4212-8d14-01b10e6ccca6",
+      "name": "Upsert investor company",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": {
+        "x": 220,
+        "y": 264
+      },
+      "settings": {
+        "input": {
+          "objectName": "company",
+          "objectRecord": {
+            "name": "{{trigger.organization}}",
+            "domainName": "{{trigger.companyDomain}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "3d10794b-f38b-490c-864c-088a1af4eba0"
+      ]
+    }
+  ]
+}

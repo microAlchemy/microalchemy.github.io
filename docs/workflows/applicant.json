@@ -1,0 +1,260 @@
+{
+  "workflowId": "e913d447-9134-4b0c-9b80-de7276b72f23",
+  "workflowVersionId": "9ffebcdf-c65b-4455-b780-e6fc32acf0fe",
+  "trigger": {
+    "name": "Applicant form submitted",
+    "type": "WEBHOOK",
+    "settings": {
+      "httpMethod": "POST",
+      "expectedBody": {
+        "email": "applicant@example.com",
+        "phone": "+1 555 555 0100",
+        "resume": [
+          {
+            "fileId": "11111111-1111-4111-8111-111111111111",
+            "label": "example-resume.pdf"
+          }
+        ],
+        "website": "https://linkedin.com/in/example",
+        "fullName": "Example Applicant",
+        "lastName": "Applicant",
+        "firstName": "Example",
+        "roleTitle": "Founding Software Engineer - EDA Tool Design",
+        "startDate": "2026-10-01",
+        "resumeName": "example-resume.pdf",
+        "sourcePath": "/intake?type=applicant",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "submissionId": "11111111-1111-4111-8111-111111111111",
+        "notificationBody": "Applicant summary",
+        "notificationSubject": "New applicant: Example Applicant",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "outputSchema": {
+        "email": "applicant@example.com",
+        "phone": "+1 555 555 0100",
+        "resume": [
+          {
+            "fileId": "11111111-1111-4111-8111-111111111111",
+            "label": "example-resume.pdf"
+          }
+        ],
+        "website": "https://linkedin.com/in/example",
+        "fullName": "Example Applicant",
+        "lastName": "Applicant",
+        "firstName": "Example",
+        "roleTitle": "Founding Software Engineer - EDA Tool Design",
+        "startDate": "2026-10-01",
+        "resumeName": "example-resume.pdf",
+        "sourcePath": "/intake?type=applicant",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "submissionId": "11111111-1111-4111-8111-111111111111",
+        "notificationBody": "Applicant summary",
+        "notificationSubject": "New applicant: Example Applicant",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      },
+      "authentication": "API_KEY",
+      "expectedOutputSchema": {
+        "email": "applicant@example.com",
+        "phone": "+1 555 555 0100",
+        "resume": [
+          {
+            "fileId": "11111111-1111-4111-8111-111111111111",
+            "label": "example-resume.pdf"
+          }
+        ],
+        "website": "https://linkedin.com/in/example",
+        "fullName": "Example Applicant",
+        "lastName": "Applicant",
+        "firstName": "Example",
+        "roleTitle": "Founding Software Engineer - EDA Tool Design",
+        "startDate": "2026-10-01",
+        "resumeName": "example-resume.pdf",
+        "sourcePath": "/intake?type=applicant",
+        "submittedAt": "2026-09-01T17:00:00.000Z",
+        "submissionId": "11111111-1111-4111-8111-111111111111",
+        "notificationBody": "Applicant summary",
+        "notificationSubject": "New applicant: Example Applicant",
+        "phones": {
+          "primaryPhoneNumber": "4165550123",
+          "primaryPhoneCallingCode": "+1",
+          "primaryPhoneCountryCode": "CA"
+        },
+        "profileLink": {
+          "primaryLinkUrl": "https://example.com/profile",
+          "primaryLinkLabel": "Submitted profile"
+        },
+        "companyDomain": {
+          "primaryLinkUrl": "https://example.com"
+        },
+        "consentStatus": "PERMISSION_TO_RETAIN"
+      }
+    },
+    "nextStepIds": [
+      "b2b49c72-9667-4a8f-b88e-8667362d52e4"
+    ]
+  },
+  "steps": [
+    {
+      "id": "b2b49c72-9667-4a8f-b88e-8667362d52e4",
+      "name": "Upsert applicant contact",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": null,
+      "settings": {
+        "input": {
+          "objectName": "person",
+          "objectRecord": {
+            "name": {
+              "lastName": "{{trigger.lastName}}",
+              "firstName": "{{trigger.firstName}}"
+            },
+            "emails": {
+              "primaryEmail": "{{trigger.email}}"
+            },
+            "phones": "{{trigger.phones}}",
+            "linkedinLink": "{{trigger.profileLink}}"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "2d58aca5-8e42-4b3b-a218-50d39e04cba7"
+      ]
+    },
+    {
+      "id": "2d58aca5-8e42-4b3b-a218-50d39e04cba7",
+      "name": "Upsert application",
+      "type": "UPSERT_RECORD",
+      "valid": true,
+      "position": null,
+      "settings": {
+        "input": {
+          "objectName": "coopApplication",
+          "objectRecord": {
+            "name": "{{trigger.fullName}} — {{trigger.roleTitle}}",
+            "person": {
+              "id": "{{b2b49c72-9667-4a8f-b88e-8667362d52e4.id}}"
+            },
+            "resume": "{{trigger.resume}}",
+            "intakeRole": "{{trigger.roleTitle}}",
+            "sourcePath": "{{trigger.sourcePath}}",
+            "submittedAt": "{{trigger.submittedAt}}",
+            "intakeSummary": "{{trigger.notificationBody}}",
+            "availabilityStart": "{{trigger.startDate}}",
+            "intakeSubmissionId": "{{trigger.submissionId}}",
+            "id": "{{trigger.submissionId}}",
+            "consentStatus": "{{trigger.consentStatus}}",
+            "applicationSource": "DIRECT"
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "9dc1bd1e-f52e-45b5-8972-da1bf9ce8c72",
+        "50f17118-a931-411a-bc18-142456f70f67"
+      ]
+    },
+    {
+      "id": "9dc1bd1e-f52e-45b5-8972-da1bf9ce8c72",
+      "name": "Notify Kunal",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": null,
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "kunal@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    },
+    {
+      "id": "50f17118-a931-411a-bc18-142456f70f67",
+      "name": "Notify Aditya",
+      "type": "SEND_EMAIL",
+      "valid": true,
+      "position": null,
+      "settings": {
+        "input": {
+          "body": "{{trigger.notificationBody}}\n\nSource: {{trigger.sourcePath}}\nSubmission reference: {{trigger.submissionId}}",
+          "files": [],
+          "subject": "{{trigger.notificationSubject}}",
+          "inReplyTo": "",
+          "recipients": {
+            "cc": "",
+            "to": "aditya@microalchemy.xyz",
+            "bcc": ""
+          },
+          "connectedAccountId": "ecbf3948-f146-4ef4-bbca-00aca8475461"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": null
+    }
+  ]
+}

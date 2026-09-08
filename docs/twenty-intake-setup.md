@@ -1,87 +1,52 @@
-# Twenty CRM intake setup
+# Twenty website intake workflows
 
-Create three webhook-triggered workflows in Twenty. The relay chooses the workflow by audience, so applicants, prospective customers, and investors land in the correct pipeline while sharing one website experience.
+Three API-key-authenticated webhook workflows create CRM records and notify Kunal and Aditya. Reviewed definitions in `docs/workflows/` contain configuration and synthetic examples, not submissions or credentials.
 
-Before activating email actions, connect a sending mailbox under **Settings → Accounts** and confirm it has sending permission.
+| Audience | Workflow | Record object |
+| --- | --- | --- |
+| Applicant | Website — Applicant intake | `coopApplication` (Applications) |
+| Customer | Website — Customer interest | `opportunity` (Opportunities) |
+| Investor | Website — Investor interest | `investorEngagement` (Investor Engagements) |
 
-## Shared payload
+## Shared contract
 
-Each webhook receives flat JSON fields that are easy to select in Twenty's variable picker:
+- Identity: `submissionId` (UUID v4), `submittedAt`, `firstName`, `lastName`, `fullName`, `email`.
+- Phone: `phone` is international display text; optional `phones` is the native composite `{ primaryPhoneNumber, primaryPhoneCallingCode, primaryPhoneCountryCode }`. Map the entire object. Never map a local number with blank country metadata.
+- Profile: optional `profileLink` is a native links value; map it to the contact's `linkedinLink`. It may be a portfolio rather than LinkedIn.
+- Organization: `organization`, `jobTitle`, `emailDomain`, and optional `companyDomain` (native links value). Common personal email providers are excluded from domain matching; maintain this non-exhaustive exclusion list as needed.
+- Consent: `consentStatus` is `PERMISSION_TO_RETAIN` after the required checkbox is checked.
+- Notification: `notificationSubject` and `notificationBody` include the relevant answers. Both email actions use these, followed by source path and submission reference.
+- Attribution: `sourcePath` is mapped into each intake record. UTM fields remain in the webhook payload; dedicated UTM columns are not currently mapped.
 
-- identity: `submissionId`, `submittedAt`, `fullName`, `firstName`, `lastName`, `email`, `phone`, `website`
-- organization: `organization`, `jobTitle`, `emailDomain`
-- attribution: `source`, `sourcePath`, `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`
-- routing: `audience`, `crmObject`, `status`
-- notification: `notificationSubject`, `notificationBody`
-
-Applicant payloads additionally contain `role`, `roleTitle`, `educationLevel`, `degreeFields`, `experienceAreas`, `edaExperience`, `labAccess`, `onsiteAvailability`, `startDate`, `resumeName`, and `resume`. The `resume` value is a Twenty-native `[{ fileId, label }]` array produced by the relay after uploading the file through Twenty's metadata API. Accepted résumé formats are PDF, DOC, DOCX, PNG, JPEG, and WebP, up to 10 MB.
-
-Customer payloads additionally contain `interestAreas`, `projectStage`, `timeline`, and optional `details`.
-
-Investor payloads additionally contain `investorType`, `checkSize`, and optional `details`.
+Omit absent phone/profile/domain composites instead of sending empty values that could erase existing fields.
 
 ## Applicant workflow
 
-Create a custom **Applicants** object with these fields:
+1. Upsert `person` by email; map name, phones, and profile. Do not overwrite the current job title with the applied-for role.
+2. Upsert `coopApplication`, setting `id` and `intakeSubmissionId` from `submissionId`. Map the contact relation, `intakeRole`, `sourcePath`, `submittedAt`, `intakeSummary`, native `resume`, nullable `availabilityStart`, `consentStatus`, and `applicationSource: DIRECT`.
+3. Run separate Send Email actions for `kunal@microalchemy.xyz` and `aditya@microalchemy.xyz`.
 
-| Field | Type | Purpose |
-| --- | --- | --- |
-| Name | Text | `fullName — roleTitle` |
-| Submission ID | Text, unique | Prevent duplicate webhook deliveries |
-| Status | Select | New, Reviewing, Interviewing, Offer, Hired, Rejected |
-| Person | Relation to People | Applicant contact record |
-| Role | Text or Select | Opening applied to |
-| Education | Text | Highest education level |
-| Degree fields | Multi-select | Academic background |
-| Experience areas | Multi-select | Role-specific screening answers |
-| Open-source EDA | Select | Extensive, limited/academic, or none |
-| Lab access | Long text | Current cleanroom/lab access when relevant |
-| On-site availability | Select | Local/relocating or remote-only |
-| Earliest start | Date | Applicant availability |
-| Résumé | Files (one file) | Native Twenty file stored using the instance's configured GCS backend |
-| Details | Long text | Additional context |
-| Submitted at | Date/time | Intake timestamp |
-| Source path | Text | Website attribution |
+`resume` is `[{ fileId, label }]`, from the metadata upload mutation. It is not an email-attachment value with `{ id, name, size, type }`. The field identifier must match `TWENTY_RESUME_FIELD_UNIVERSAL_IDENTIFIER`.
 
-Workflow actions:
+An omitted date is `null`, never `""`. Education, degree fields, experience, EDA familiarity, lab access, on-site availability, and details are preserved in `intakeSummary` and both emails. They are not separate screening columns. The CRM's `recruitingStatus` default is `NEW`; unrelated recruitment fields and cohort defaults are preserved.
 
-1. Webhook trigger named **Website — Applicant intake**. Define its expected body with an applicant test payload from the Worker and set authentication to **API key**.
-2. **Upsert Record → People**, matching on `email`; map name, email, phone, and website.
-3. **Create Record → Applicants**; relate it to the Person returned by step 2, map the applicant fields above, and set `Résumé` from the webhook's `resume` array.
-4. **Send Email → kunal@microalchemy.xyz** with the notification subject/body and the Applicant record link.
-5. **Send Email → aditya@microalchemy.xyz** with the same content. Twenty currently supports one recipient per Send Email action, so keep these as two actions.
+## Customer and investor workflows
 
-## Customer workflow
+1. Upsert `company` with name and optional company-domain composite.
+2. Upsert `person` by email with company relation, name, submitted job title, phones, and profile.
+3. Upsert the intake record with primary `id` and `intakeSubmissionId` equal to `submissionId`, contact/company relations, source path, timestamp, and audience-specific fields.
+4. Notify Kunal and Aditya using the complete Worker summary.
 
-Add these custom fields to **Opportunities**: Submission ID (unique text), Interest areas (multi-select), Project stage (select), Timeline (select), Intake details (long text), Source path (text), and Submitted at (date/time).
+Customer fields: `intakeOrganization`, `intakeInterestAreas`, `intakeProjectStage`, `intakeTimeline`, `intakeSummary`. Investor fields: `intakeOrganization`, `intakeInvestorType`, `intakeCheckSize`, `intakeSummary`. These are text fields, matching current metadata. Customer stage defaults to `NEW`; investor stage is left unset for review.
 
-Workflow actions:
+Company upserts use Twenty's configured unique-field matching. A domain enables matching existing domain-bearing companies. Personal email without a domain match may create another same-name company; company names are not assumed unique.
 
-1. Webhook trigger named **Website — Customer interest** with authentication set to **API key**.
-2. **Upsert Record → People**, matching on `email`.
-3. **Upsert Record → Companies**, matching on `emailDomain` when it is a company domain; map `organization` as the company name.
-4. **Create Record → Opportunities** named `organization — interestAreas`, set stage to the first/new stage, relate the Company and contact Person, and map the customer fields.
-5. Send separate notification emails to `kunal@microalchemy.xyz` and `aditya@microalchemy.xyz` using the notification subject/body fields.
+## Publication and verification
 
-If an applicant uses a public email provider, do not create a Company from that domain. The website asks customers for a work email specifically, but the workflow should still branch around common public domains.
+Copy the active version to a draft, edit it, validate once after all edits, and activate it. Keep `continueOnFailure` false. A successful webhook acknowledgement only means the workflow was enqueued.
 
-## Investor workflow
+The Worker role needs file-upload permission plus read-only Workflow Runs access. Receipt alarms observe the whole workflow. `COMPLETED` means both send actions finished; inbox delivery is a separate provider concern. Connect the sending mailbox with send permission under Settings → Accounts.
 
-Create a custom **Investor Interests** object with these fields: Name, Submission ID (unique), Status (New, Reviewing, Meeting, Passed), Person relation, Company relation, Investor type, Typical check size, Investment focus/details, Submitted at, and Source path.
+Before a real end-to-end test, authorize its record creation and notification emails. Exercise all audiences, local/international phones, a blank date, absent optional contact details, upload, retries, and downstream failures. Local regression tests mock external services and do not send mail.
 
-Workflow actions:
-
-1. Webhook trigger named **Website — Investor interest** with authentication set to **API key**.
-2. Upsert the Person by email.
-3. Upsert the Company by domain when appropriate.
-4. Create the Investor Interest record and relate the Person and Company from the earlier steps.
-5. Send separate notification emails to `kunal@microalchemy.xyz` and `aditya@microalchemy.xyz`.
-
-## Activation checklist
-
-- Test each workflow with a non-production sample record.
-- Confirm the created record and relations are correct.
-- Confirm both notification emails arrive and the Application record contains the uploaded résumé.
-- Activate all three workflows.
-- Copy each webhook URL into its matching Worker secret.
-- Submit one final test from each website intake path.
+Site deployment and workflow activation do not replay historical failures. See `intake-deployment.md` for retention and recovery.

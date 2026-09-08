@@ -6,6 +6,10 @@
   "observability": {
     "enabled": true
   },
+  "durable_objects": {
+    "bindings": [{ "name": "INTAKE_RECEIPTS", "class_name": "IntakeReceipt" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["IntakeReceipt"] }],
   "vars": {
     "ALLOWED_ORIGINS": "https://microalchemy.xyz",
     "TWENTY_API_URL": "https://crm.microalchemy.xyz",

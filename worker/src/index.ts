@@ -1,4 +1,6 @@
-interface Env {
+import { isSubmissionId, normalizePhone, optionalDate } from '../../src/lib/intake.ts'
+
+export interface Env {
   ALLOWED_ORIGINS: string
   TURNSTILE_SECRET_KEY: string
   TWENTY_API_URL: string
@@ -7,6 +9,7 @@ interface Env {
   TWENTY_APPLICANT_WEBHOOK_URL: string
   TWENTY_CUSTOMER_WEBHOOK_URL: string
   TWENTY_INVESTOR_WEBHOOK_URL: string
+  INTAKE_RECEIPTS: DurableObjectNamespace
 }
 
 type Audience = 'applicant' | 'customer' | 'investor'
@@ -16,7 +19,13 @@ type TwentyFileValue = {
   label: string
 }
 
-type IntakePayload = Record<string, unknown> & {
+type TurnstileVerification = {
+  success?: boolean
+  hostname?: string
+  'error-codes'?: string[]
+}
+
+export type IntakePayload = Record<string, unknown> & {
   schemaVersion: string
   submissionId: string
   submittedAt: string
@@ -83,6 +92,7 @@ const parseName = (fullName: string) => {
 }
 
 const emailDomain = (email: string) => email.split('@')[1]?.toLowerCase() ?? ''
+const personalEmailDomains = new Set(['gmail.com', 'googlemail.com', 'outlook.com', 'hotmail.com', 'live.com', 'yahoo.com', 'yahoo.ca', 'icloud.com', 'me.com', 'aol.com', 'proton.me', 'protonmail.com', 'msn.com'])
 
 const safeFileName = (name: string) => {
   const normalized = name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/-+/g, '-')
@@ -104,7 +114,7 @@ const corsHeaders = (origin: string) => ({
   'Vary': 'Origin',
 })
 
-const jsonResponse = (body: object, status: number, origin = '') => new Response(JSON.stringify(body), {
+export const jsonResponse = (body: object, status: number, origin = '') => new Response(JSON.stringify(body), {
   status,
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
@@ -126,12 +136,37 @@ const verifyTurnstile = async (token: string, request: Request, env: Env) => {
   const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     body,
+    signal: AbortSignal.timeout(10000),
   })
-  const result = await response.json() as { success?: boolean }
-  if (!response.ok || !result.success) throw new IntakeError('Security verification failed. Refresh the page and try again.')
+  const result = await response.json() as TurnstileVerification
+  if (response.ok && result.success) {
+    const hostname = new URL(request.headers.get('Origin')!).hostname
+    const localTest = ['localhost', '127.0.0.1'].includes(hostname)
+      && env.TURNSTILE_SECRET_KEY === '1x0000000000000000000000000000000AA'
+    if (!localTest && result.hostname !== hostname) throw new IntakeError('Security verification was issued for a different website.')
+    return
+  }
+
+  const errorCodes = result['error-codes'] ?? []
+  console.error('Turnstile verification failed', {
+    responseStatus: response.status,
+    errorCodes,
+    hostname: result.hostname,
+  })
+
+  if (errorCodes.includes('missing-input-secret') || errorCodes.includes('invalid-input-secret')) {
+    throw new IntakeError('Security verification is temporarily unavailable. Please try again later.', 503)
+  }
+  if (errorCodes.includes('timeout-or-duplicate')) {
+    throw new IntakeError('Security verification expired. Complete it again and resubmit.')
+  }
+  if (errorCodes.includes('invalid-input-response') || errorCodes.includes('missing-input-response')) {
+    throw new IntakeError('Security verification was not accepted. Complete it again and resubmit.')
+  }
+  throw new IntakeError('Security verification could not be completed. Please try again.', 503)
 }
 
-const webhookForAudience = (audience: Audience, env: Env) => {
+export const webhookForAudience = (audience: Audience, env: Env) => {
   if (audience === 'applicant') return env.TWENTY_APPLICANT_WEBHOOK_URL
   if (audience === 'customer') return env.TWENTY_CUSTOMER_WEBHOOK_URL
   return env.TWENTY_INVESTOR_WEBHOOK_URL
@@ -144,9 +179,25 @@ const buildPayload = (form: FormData, audience: Audience): IntakePayload => {
   if (asString(form, 'consent', 10) !== 'yes') throw new IntakeError('Consent is required.')
 
   const { firstName, lastName } = parseName(fullName)
+  let phones
+  let startDate
+  try {
+    phones = normalizePhone(asString(form, 'phone', 40), asString(form, 'phoneCountry', 2))
+    startDate = optionalDate(asString(form, 'startDate', 20))
+  } catch (error) {
+    throw new IntakeError((error as Error).message)
+  }
+  const submissionId = asString(form, 'submissionId', 100) || crypto.randomUUID()
+  if (!isSubmissionId(submissionId)) throw new IntakeError('Invalid submission reference. Reload the form.')
+  const website = asString(form, 'website', 300)
+  if (website) {
+    try {
+      if (!['https:', 'http:'].includes(new URL(website).protocol)) throw new Error()
+    } catch { throw new IntakeError('Enter a website beginning with https:// or http://.') }
+  }
   const payload: IntakePayload = {
     schemaVersion: '1',
-    submissionId: crypto.randomUUID(),
+    submissionId,
     submittedAt: new Date().toISOString(),
     audience,
     crmObject: audience === 'applicant' ? 'Applicant' : audience === 'customer' ? 'Opportunity' : 'Investor Interest',
@@ -159,8 +210,13 @@ const buildPayload = (form: FormData, audience: Audience): IntakePayload => {
     lastName,
     email,
     emailDomain: emailDomain(email),
-    phone: asString(form, 'phone', 40),
-    website: asString(form, 'website', 300),
+    companyDomain: !personalEmailDomains.has(emailDomain(email))
+      ? { primaryLinkUrl: `https://${emailDomain(email)}` } : undefined,
+    phone: phones ? `${phones.primaryPhoneCallingCode}${phones.primaryPhoneNumber}` : '',
+    phones,
+    website,
+    profileLink: website ? { primaryLinkUrl: website, primaryLinkLabel: 'Submitted profile' } : undefined,
+    consentStatus: 'PERMISSION_TO_RETAIN',
     organization: asString(form, 'organization', 180),
     jobTitle: asString(form, 'jobTitle', 120),
     details: asString(form, 'details', 5000),
@@ -195,7 +251,7 @@ const buildPayload = (form: FormData, audience: Audience): IntakePayload => {
       payload.edaExperience = requireValue(payload.edaExperience as string, 'Open-source EDA experience')
     }
     payload.onsiteAvailability = requireValue(asString(form, 'onsiteAvailability', 120), 'On-site availability')
-    payload.startDate = asString(form, 'startDate', 20)
+    payload.startDate = startDate
     payload.phone = requireValue(payload.phone as string, 'Phone number')
     payload.notificationSubject = `New applicant: ${fullName} — ${roleTitles[role]}`
   }
@@ -249,6 +305,8 @@ const buildPayload = (form: FormData, audience: Audience): IntakePayload => {
     `Name: ${fullName}`,
     `Email: ${email}`,
     payload.organization ? `Organization: ${payload.organization}` : '',
+    audience !== 'applicant' && payload.phone ? `Phone: ${payload.phone}` : '',
+    audience !== 'applicant' && payload.website ? `Profile: ${payload.website}` : '',
     ...detailLines,
     payload.details ? `\nDetails:\n${payload.details}` : '',
   ].filter(Boolean).join('\n')
@@ -256,11 +314,7 @@ const buildPayload = (form: FormData, audience: Audience): IntakePayload => {
   return payload
 }
 
-const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env: Env) => {
-  if (!env.TWENTY_API_URL || !env.TWENTY_API_KEY || !env.TWENTY_RESUME_FIELD_UNIVERSAL_IDENTIFIER) {
-    throw new IntakeError('Résumé storage is not configured.', 503)
-  }
-
+const validateResume = (form: FormData) => {
   const file = form.get('resume')
   if (!(file instanceof File) || !file.size) throw new IntakeError('Attach your résumé before submitting.')
   if (file.size > MAX_RESUME_BYTES) throw new IntakeError('Your résumé must be 10 MB or smaller.')
@@ -270,6 +324,14 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
   if (!allowedResumeExtensions.has(extension) || !allowedResumeMimeTypes.has(file.type)) {
     throw new IntakeError('Upload your résumé as a PDF, DOC, DOCX, PNG, JPEG, or WebP file.')
   }
+  return { file, name }
+}
+
+export const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env: Env) => {
+  if (!env.TWENTY_API_URL || !env.TWENTY_API_KEY || !env.TWENTY_RESUME_FIELD_UNIVERSAL_IDENTIFIER) {
+    throw new IntakeError('Résumé storage is not configured.', 503)
+  }
+  const { file, name } = validateResume(form)
 
   const apiUrl = new URL(env.TWENTY_API_URL)
   if (apiUrl.protocol !== 'https:') throw new IntakeError('Résumé storage is not configured.', 503)
@@ -296,8 +358,10 @@ const uploadResumeToTwenty = async (form: FormData, payload: IntakePayload, env:
 
   const response = await fetch(apiUrl, {
     method: 'POST',
+    redirect: 'manual',
     headers: { Authorization: `Bearer ${env.TWENTY_API_KEY}` },
     body: uploadBody,
+    signal: AbortSignal.timeout(20000),
   })
   const result = await response.json() as {
     data?: { uploadFilesFieldFileByUniversalIdentifier?: { id: string } }
@@ -328,33 +392,27 @@ const submitIntake = async (request: Request, env: Env, origin: string) => {
   const form = await request.formData()
   if (asString(form, 'companyFax', 200)) return jsonResponse({ ok: true }, 200, origin)
 
-  await verifyTurnstile(asString(form, 'turnstileToken', 4096), request, env)
   const audience = parseAudience(asString(form, 'audience', 20))
   const payload = buildPayload(form, audience)
-
-  if (audience === 'applicant') await uploadResumeToTwenty(form, payload, env)
-
+  if (audience === 'applicant') {
+    validateResume(form)
+    if (!env.TWENTY_RESUME_FIELD_UNIVERSAL_IDENTIFIER) throw new IntakeError('Résumé storage is not configured.', 503)
+  }
   const webhookUrl = webhookForAudience(audience, env)
-  if (!webhookUrl || !env.TWENTY_API_KEY) {
+  if (!webhookUrl || !env.TWENTY_API_KEY || !env.TWENTY_API_URL || !env.INTAKE_RECEIPTS) {
     throw new IntakeError('The CRM destination is not configured.', 503)
   }
 
-  try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.TWENTY_API_KEY}`,
-      },
-      body: JSON.stringify(payload),
-    })
-    if (!response.ok) throw new Error(`Twenty returned ${response.status}`)
-  } catch (error) {
-    console.error('Failed to deliver intake submission to Twenty', error)
-    throw new IntakeError('We could not deliver your submission. Please try again.', 502)
-  }
-
-  return jsonResponse({ ok: true, submissionId: payload.submissionId }, 201, origin)
+  if (new URL(webhookUrl).origin !== new URL(env.TWENTY_API_URL).origin
+    || new URL(webhookUrl).protocol !== 'https:') throw new IntakeError('The CRM destination is not configured.', 503)
+  await verifyTurnstile(asString(form, 'turnstileToken', 2048), request, env)
+  const relay = new FormData()
+  relay.set('payload', JSON.stringify(payload))
+  const resume = form.get('resume')
+  if (resume instanceof File) relay.set('resume', resume)
+  const receipt = env.INTAKE_RECEIPTS.get(env.INTAKE_RECEIPTS.idFromName(payload.submissionId))
+  const result = await receipt.fetch(new Request('https://receipt/submit', { method: 'POST', body: relay }))
+  return jsonResponse(await result.json() as object, result.status, origin)
 }
 
 export default {
@@ -364,10 +422,13 @@ export default {
     const isAllowedOrigin = Boolean(origin && allowedOrigins(env).has(origin))
 
     if (request.method === 'GET' && url.pathname === '/health') {
-      return jsonResponse({ ok: true }, 200)
+      const configured = Boolean(env.TURNSTILE_SECRET_KEY && env.TWENTY_API_KEY && env.TWENTY_API_URL
+        && env.TWENTY_APPLICANT_WEBHOOK_URL && env.TWENTY_CUSTOMER_WEBHOOK_URL
+        && env.TWENTY_INVESTOR_WEBHOOK_URL && env.INTAKE_RECEIPTS)
+      return jsonResponse({ ok: configured, scope: 'relay-configuration' }, configured ? 200 : 503)
     }
 
-    if (url.pathname !== '/submit') return jsonResponse({ message: 'Not found.' }, 404)
+    if (!['/submit', '/status'].includes(url.pathname)) return jsonResponse({ message: 'Not found.' }, 404)
     if (!isAllowedOrigin) return jsonResponse({ message: 'Origin is not allowed.' }, 403)
 
     if (request.method === 'OPTIONS') {
@@ -376,6 +437,13 @@ export default {
     if (request.method !== 'POST') return jsonResponse({ message: 'Method not allowed.' }, 405, origin)
 
     try {
+      if (url.pathname === '/status') {
+        const { submissionId } = await request.json() as { submissionId?: string }
+        if (!isSubmissionId(submissionId)) throw new IntakeError('Invalid submission reference.')
+        const receipt = env.INTAKE_RECEIPTS.get(env.INTAKE_RECEIPTS.idFromName(submissionId))
+        const response = await receipt.fetch('https://receipt/status')
+        return jsonResponse(await response.json() as object, response.status, origin)
+      }
       return await submitIntake(request, env, origin)
     } catch (error) {
       if (error instanceof IntakeError) return jsonResponse({ message: error.message }, error.status, origin)
@@ -384,3 +452,5 @@ export default {
     }
   },
 }
+
+export { IntakeReceipt } from './receipt.ts'

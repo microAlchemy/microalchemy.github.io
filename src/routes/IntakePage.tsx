@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RefObject, SubmitEvent as ReactSubmitEvent } from 'react'
+import { getCountries } from 'libphonenumber-js/max'
+import { isSubmissionId, normalizePhone } from '../lib/intake'
 import './intake.css'
 
 type Audience = 'applicant' | 'customer' | 'investor'
-type SubmissionState = 'idle' | 'submitting' | 'success' | 'error'
+type SubmissionState = 'idle' | 'submitting' | 'processing' | 'success' | 'error' | 'needs_review' | 'failed'
+type ReceiptResponse = { ok?: boolean; submissionId?: string; status?: string; message?: string }
 type JobOption = { slug: string; title: string }
 
 type TurnstileApi = {
@@ -150,6 +153,10 @@ const TurnstileWidget = ({
   return <div ref={containerRef} className="intake-turnstile" aria-label="Security verification" />
 }
 
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+const phoneCountries = getCountries().map((code) => ({ code, name: countryNames.of(code) ?? code }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'en'))
+
 const CommonFields = ({ audience }: { audience: Audience }) => (
   <>
     <div className="intake-form-grid">
@@ -163,7 +170,15 @@ const CommonFields = ({ audience }: { audience: Audience }) => (
       </label>
       <label className="intake-field">
         <span>Phone {audience === 'applicant' ? <b>*</b> : <em>optional</em>}</span>
-        <input name="phone" type="tel" autoComplete="tel" required={audience === 'applicant'} maxLength={40} />
+        <input name="phone" type="tel" autoComplete="tel" placeholder="+1 416 555 0123" required={audience === 'applicant'} maxLength={40} />
+        <span className="intake-field-help">Include the country code, or select the phone’s country below.</span>
+      </label>
+      <label className="intake-field">
+        <span>Phone country <em>optional for international numbers</em></span>
+        <select name="phoneCountry" defaultValue="">
+          <option value="">My number includes +country code</option>
+          {phoneCountries.map(({ code, name }) => <option key={code} value={code}>{name}</option>)}
+        </select>
       </label>
       <label className="intake-field">
         <span>{audience === 'applicant' ? 'LinkedIn or portfolio' : 'Website or LinkedIn'} <em>optional</em></span>
@@ -359,6 +374,7 @@ const InvestorFields = () => (
 )
 
 const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: JobOption[] }) => {
+  const [ready, setReady] = useState(false)
   const [role, setRole] = useState(jobOptions[0]?.slug ?? '')
   const [presetInterest, setPresetInterest] = useState('')
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle')
@@ -368,10 +384,77 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
   const turnstileWidgetIdRef = useRef<string | undefined>(undefined)
   const applicantFollowUpRef = useRef<HTMLElement>(null)
   const bookingRef = useRef<HTMLElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const submissionIdRef = useRef('')
+  const [receiptId, setReceiptId] = useState('')
+  const [statusCheck, setStatusCheck] = useState(0)
 
   const endpoint = import.meta.env.PUBLIC_INTAKE_API_URL || 'https://microalchemy-intake.kunal-chandan.workers.dev/submit'
   const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || (import.meta.env.DEV ? '1x00000000000000000000AA' : '')
   const copy = audienceCopy[audience]
+  const storageKey = `microalchemy-intake-${audience}`
+  const statusEndpoint = new URL('/status', endpoint).href
+  const applyReceipt = useCallback((result: ReceiptResponse) => {
+    if (!result.ok || !isSubmissionId(result.submissionId)
+      || !['processing', 'completed', 'failed', 'needs_review'].includes(result.status ?? '')) {
+      throw new Error('We could not confirm receipt. Your information has not been cleared; please try again.')
+    }
+    submissionIdRef.current = result.submissionId
+    setReceiptId(result.submissionId)
+    setStatusMessage(result.message ?? 'Received. Checking submission status…')
+    setSubmissionState(result.status === 'completed' ? 'success' : result.status as SubmissionState)
+    try {
+      if (result.status === 'completed') sessionStorage.removeItem(storageKey)
+      else sessionStorage.setItem(storageKey, result.submissionId)
+    } catch { /* Storage may be disabled by the browser. */ }
+    if (result.status === 'completed') formRef.current?.reset()
+  }, [storageKey])
+
+  useEffect(() => {
+    setReady(true)
+    try {
+      const saved = sessionStorage.getItem(storageKey)
+      if (isSubmissionId(saved)) {
+        submissionIdRef.current = saved
+        setReceiptId(saved)
+        setSubmissionState('processing')
+      }
+    } catch { /* Storage may be disabled by the browser. */ }
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!receiptId || submissionState !== 'processing') return
+    const controller = new AbortController()
+    let timer: ReturnType<typeof setTimeout>
+    let attempts = 0
+    const poll = async () => {
+      try {
+        const response = await fetch(statusEndpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId: receiptId }),
+          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]),
+        })
+        if (controller.signal.aborted) return
+        if (response.status === 404) {
+          setReceiptId('')
+          setSubmissionState('error')
+          setStatusMessage('No receipt was found. Please submit the form again.')
+          return
+        }
+        if (!response.ok) throw new Error('Status check unavailable')
+        const result = await response.json() as ReceiptResponse
+        if (controller.signal.aborted) return
+        applyReceipt(result)
+        if (result.status !== 'processing') return
+      } catch {
+        if (controller.signal.aborted) return
+        setStatusMessage('We could not check your submission yet. Use Check status below; please do not submit it again.')
+      }
+      if (++attempts < 20) timer = setTimeout(poll, 3000)
+    }
+    timer = setTimeout(poll, 1500)
+    return () => { controller.abort(); clearTimeout(timer) }
+  }, [receiptId, submissionState, statusCheck, statusEndpoint, applyReceipt])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -381,8 +464,6 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
       setRole(requestedRoleExists ? requestedRole! : jobOptions[0]?.slug ?? '')
     }
     setPresetInterest(params.get('interest') ?? '')
-    setSubmissionState('idle')
-    setStatusMessage('')
     setTurnstileToken('')
     startedAtRef.current = Date.now()
   }, [audience, jobOptions])
@@ -395,6 +476,8 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
   }, [audience, submissionState])
 
   const validateSubmission = (data: FormData) => {
+    try { normalizePhone(String(data.get('phone') ?? ''), String(data.get('phoneCountry') ?? '')) }
+    catch (error) { return (error as Error).message }
     const resume = data.get('resume')
     if (audience === 'applicant') {
       if (!data.getAll('degreeFields').length) return 'Select at least one degree field.'
@@ -419,6 +502,9 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
     }
 
     data.set('audience', audience)
+    submissionIdRef.current ||= crypto.randomUUID()
+    data.set('submissionId', submissionIdRef.current)
+    try { sessionStorage.setItem(storageKey, submissionIdRef.current) } catch { /* Optional browser storage. */ }
     data.set('turnstileToken', turnstileToken)
     data.set('formStartedAt', String(startedAtRef.current))
     data.set('sourcePath', `${window.location.pathname}${window.location.search}`)
@@ -433,21 +519,31 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
     setStatusMessage('Sending your information…')
 
     try {
-      const response = await fetch(endpoint, { method: 'POST', body: data })
-      const result = await response.json().catch(() => ({})) as { message?: string }
-      if (!response.ok) throw new Error(result.message || 'We could not send your submission.')
+      const response = await fetch(endpoint, { method: 'POST', body: data, signal: AbortSignal.timeout(45000) })
+      const result = await response.json().catch(() => ({})) as ReceiptResponse
+      if (!response.ok) {
+        if (response.status < 500 && response.status !== 409) {
+          try { sessionStorage.removeItem(storageKey) } catch { /* Optional browser storage. */ }
+          submissionIdRef.current = ''
+        }
+        throw new Error(result.message || 'We could not send your submission.')
+      }
 
-      form.reset()
-      setSubmissionState('success')
-      setStatusMessage('Received. We will contact you shortly.')
+      applyReceipt(result)
       setTurnstileToken('')
       window.turnstile?.reset(turnstileWidgetIdRef.current)
       startedAtRef.current = Date.now()
     } catch (error) {
       setTurnstileToken('')
       window.turnstile?.reset(turnstileWidgetIdRef.current)
-      setSubmissionState('error')
-      setStatusMessage(error instanceof Error ? error.message : 'We could not send your submission. Please try again.')
+      if (submissionIdRef.current) {
+        setReceiptId(submissionIdRef.current)
+        setSubmissionState('processing')
+        setStatusMessage('The connection was interrupted. Checking whether your submission was received…')
+      } else {
+        setSubmissionState('error')
+        setStatusMessage(error instanceof Error ? error.message : 'We could not send your submission. Please try again.')
+      }
     }
   }
 
@@ -472,7 +568,8 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
             <p>Fields marked * are required.</p>
           </div>
 
-          <form key={audience} onSubmit={handleSubmit} className="intake-form">
+          <form ref={formRef} key={audience} onSubmit={handleSubmit} className="intake-form">
+            <fieldset className="intake-fields" disabled={!ready || submissionState === 'submitting' || Boolean(receiptId)}>
             <input className="intake-honeypot" type="text" name="companyFax" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <CommonFields audience={audience} />
             {audience === 'applicant' ? <ApplicantFields role={role} setRole={setRole} jobOptions={jobOptions} /> : null}
@@ -483,6 +580,8 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
               <input type="checkbox" name="consent" value="yes" required />
               <span>I agree that MicroAlchemy may use this information to evaluate and respond to my submission. <b>*</b></span>
             </label>
+
+            </fieldset>
 
             {turnstileSiteKey ? (
               <TurnstileWidget
@@ -495,11 +594,15 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
             )}
 
             <div className="intake-submit-row">
-              <button type="submit" disabled={submissionState === 'submitting' || !turnstileSiteKey}>
-                {submissionState === 'submitting' ? 'Submitting…' : audience === 'applicant' ? 'Submit application' : 'Send inquiry'}
+              <button type="submit" disabled={!ready || submissionState === 'submitting' || !turnstileSiteKey || Boolean(receiptId)}>
+                {!ready ? 'Loading form…' : submissionState === 'submitting' ? 'Submitting…' : audience === 'applicant' ? 'Submit application' : 'Send inquiry'}
               </button>
               <p className={`intake-status intake-status-${submissionState}`} role="status" aria-live="polite">{statusMessage}</p>
             </div>
+            {receiptId ? <p className="intake-status">Reference: {receiptId}</p> : null}
+            {receiptId && submissionState === 'processing' ? (
+              <button type="button" className="blog-cta-link" onClick={() => setStatusCheck((value) => value + 1)}>Check status</button>
+            ) : null}
 
             {audience === 'applicant' && submissionState === 'success' ? (
               <aside ref={applicantFollowUpRef} className="intake-follow-up" tabIndex={-1} aria-labelledby="applicant-follow-up-title">
