@@ -263,6 +263,14 @@
   color: #eef2ec;
 }
 
+.job-apply-strip > span {
+  font-weight: 500;
+}
+
+.job-apply-strip .blog-cta-link {
+  flex: 0 0 auto;
+}
+
 .blog-not-found {
   max-width: 640px;
   margin: 2rem auto;
@@ -335,6 +343,11 @@
   }
 
   .job-apply-strip {
-    align-items: flex-start;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .job-apply-strip .blog-cta-link {
+    width: 100%;
   }
 }

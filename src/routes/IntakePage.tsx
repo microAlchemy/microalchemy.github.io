@@ -439,7 +439,7 @@ const IntakePage = ({ audience, jobOptions }: { audience: Audience; jobOptions: 
 
       form.reset()
       setSubmissionState('success')
-      setStatusMessage('Received. Kunal and Aditya have been notified, and your submission is now in our CRM.')
+      setStatusMessage('Received. We will contact you shortly.')
       setTurnstileToken('')
       window.turnstile?.reset(turnstileWidgetIdRef.current)
       startedAtRef.current = Date.now()
