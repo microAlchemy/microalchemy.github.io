@@ -6,6 +6,7 @@ import goldenLogo from '../img/investors/golden.svg'
 import gtechLogo from '../img/optimized/gtech.webp'
 import iisenseLogo from '../img/optimized/iisense.webp'
 import uwaterlooLogo from '../img/optimized/uwaterloo.webp'
+import mandelLogo from '../img/partners/mandel.svg'
 import adityaPhoto from '../img/optimized/aditya.webp'
 import kunalPhoto from '../img/optimized/kunal.webp'
 import saifPhoto from '../img/optimized/saif.webp'
@@ -65,6 +66,7 @@ const partners: Card[] = [
   { name: 'IISENSE', url: 'https://iisense.ca/', logo: iisenseLogo.src },
   { name: 'Silicon Jackets @ Georgia Tech', url: 'https://siliconjackets.gt/', logo: gtechLogo.src },
   { name: 'University of Waterloo', url: 'https://uwaterloo.ca/', logo: uwaterlooLogo.src, wideLogo: true },
+  { name: 'Mandel Diagnostics', url: 'https://mandeldx.com/', logo: mandelLogo.src, wideLogo: true },
   { name: 'Partner with us', url: '/build-with-us/?interest=partnership', cta: true, logoType: 'text', logoText: 'Your Logo Here' },
 ]
 
